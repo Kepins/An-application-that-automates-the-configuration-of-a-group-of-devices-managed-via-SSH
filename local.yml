@@ -2,7 +2,9 @@ version: "3.9"
 
 services:
   django:
-    build: docker/django/local
+    build:
+      context: .
+      dockerfile: docker/django/local/Dockerfile
     volumes:
       - .:/home/django/code
     ports:

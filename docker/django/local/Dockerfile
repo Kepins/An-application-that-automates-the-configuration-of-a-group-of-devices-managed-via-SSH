@@ -13,15 +13,14 @@ USER django
 WORKDIR /home/django/code
 
 # Install dependencies
-COPY ./requirements requirements
+COPY requirements requirements
 RUN pip install -r requirements/local.txt
 
 
 # Copy project
-COPY ../../.. .
-
+COPY . .
 
 CMD ["python", "manage.py", "migrate", "--settings=config.settings.local"]
-CMD ["python", "manage.py", "runserver", "--settings=config.settings.local"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000", "--settings=config.settings.local"]
 
 

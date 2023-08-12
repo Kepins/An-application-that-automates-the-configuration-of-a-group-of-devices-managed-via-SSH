@@ -28,7 +28,7 @@ SECRET_KEY = env("DJANGO_SECRET_KEY", default='SECRET_KEY')
 FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", default='SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool("DJANGO_DEBUG", False)
+DEBUG = env.bool("DJANGO_DEBUG", True)
 
 
 # Application definition
@@ -78,11 +78,11 @@ ALLOWED_HOSTS = ["*"]
 
 DATABASES = {
     "default": {
-        "ENGINE": env("DB_ENGINE", "django.db.backends.postgresql"),
-        "NAME": env("POSTGRES_DB", 'db'),
-        "USER": env("POSTGRES_USER", 'user'),
-        "PASSWORD": env("POSTGRES_PASSWORD", 'password'),
-        "HOST": env("DB_HOST", 'database'),
+        "ENGINE": env("DB_ENGINE", default="django.db.backends.postgresql"),
+        "NAME": env("POSTGRES_DB", default='ssh_application'),
+        "USER": env("POSTGRES_USER", default='postgres'),
+        "PASSWORD": env("POSTGRES_PASSWORD", default='postgres'),
+        "HOST": env("DB_HOST", default='database'),
     }
 }
 
@@ -123,12 +123,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
+STATIC_ROOT = (os.path.join(BASE_DIR, "static"),)
+STATIC_URL = "static/"
 
-MEDIA_URL = os.path.join(BASE_DIR, "static/")
 
-STATIC_URL = ('static/')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+
+
+
 
 
