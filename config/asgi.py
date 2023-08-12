@@ -1,5 +1,5 @@
 """
-ASGI config for ssh_configuration_app project.
+ASGI config for config project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 dirname = os.path.dirname
 load_dotenv(os.path.join(dirname(dirname(__file__)), ".env"))
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ssh_configuration_app.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 application = get_asgi_application()
 
