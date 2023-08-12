@@ -24,11 +24,11 @@ Env.read_env(os.path.join(BASE_DIR, ".env"))
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the  key used in production secret!
-SECRET_KEY = env("DJANGO_SECRET_KEY")
-FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY")
+SECRET_KEY = env("DJANGO_SECRET_KEY", default='SECRET_KEY')
+FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", default='SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DJANGO_DEBUG")
+DEBUG = env.bool("DJANGO_DEBUG", False)
 
 
 # Application definition
@@ -78,11 +78,11 @@ ALLOWED_HOSTS = ["*"]
 
 DATABASES = {
     "default": {
-        "ENGINE": env("DB_ENGINE"),
-        "NAME": env("POSTGRES_DB"),
-        "USER": env("POSTGRES_USER"),
-        "PASSWORD": env("POSTGRES_PASSWORD"),
-        "HOST": env("DB_HOST"),
+        "ENGINE": env("DB_ENGINE", "django.db.backends.postgresql"),
+        "NAME": env("POSTGRES_DB", 'db'),
+        "USER": env("POSTGRES_USER", 'user'),
+        "PASSWORD": env("POSTGRES_PASSWORD", 'password'),
+        "HOST": env("DB_HOST", 'database'),
     }
 }
 
