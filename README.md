@@ -10,15 +10,12 @@ git clone git@github.com:Kepins/An-application-that-automates-the-configuration-
 ```
 
 2. Create .env file based on .env.example and set your variables
-3. Run migrations
+
+3. Create superuser
 ```
-docker-compose run django python manage.py migrate
+docker compose run django python manage.py createsuperuser
 ```
-4. Create superuser
+4. Run docker compose
 ```
-docker-compose run django python manage.py createsuperuser
-```
-5. Run docker compose
-```
-docker compose up
+docker compose -f=local.yml up
 ```

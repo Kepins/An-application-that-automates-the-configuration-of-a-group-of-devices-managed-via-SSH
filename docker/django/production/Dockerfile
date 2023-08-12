@@ -13,13 +13,13 @@ USER django
 WORKDIR /home/django/code
 
 # Install dependencies
-COPY ./requirements /requirements
-RUN pip install --no-cache-dir -r /requirements/production.txt
+COPY requirements requirements
+RUN pip install -r /requirements/production.txt
 
 
 # Copy project
-COPY ../../.. .
+COPY . .
 
 CMD ["python", "manage.py", "migrate", "--settings=config.settings.production"]
-CMD ["python", "manage.py", "runserver", "--settings=config.settings.production"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0", "--settings=config.settings.production"]
 

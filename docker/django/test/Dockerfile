@@ -13,8 +13,9 @@ USER django
 WORKDIR /home/django/code
 
 # Install dependencies
-COPY ./requirements /requirements
-RUN pip install --no-cache-dir -r /requirements/test.txt
+COPY requirements requirements
+RUN pip install -r /requirements/test.txt
 
 # Copy project
-COPY ../../.. .
+COPY . .
+
