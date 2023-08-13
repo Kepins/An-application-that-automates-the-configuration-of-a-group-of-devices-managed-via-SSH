@@ -5,6 +5,9 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+COPY ./docker/django/local/start.sh /start.sh
+RUN chmod +x /start.sh
+
 # Create non-root user
 RUN useradd -ms /bin/bash django
 USER django
@@ -20,7 +23,9 @@ RUN pip install -r requirements/local.txt
 # Copy project
 COPY . .
 
-CMD ["python", "manage.py", "migrate", "--settings=config.settings.local"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000", "--settings=config.settings.local"]
+
+
+
+
 
 
