@@ -11,6 +11,7 @@ services:
       - 8000:8000
     depends_on:
       - database
+    command: /start.sh
   database:
     image: postgres:14
     volumes:

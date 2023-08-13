@@ -5,6 +5,9 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+COPY ./docker/django/production/start.sh /start.sh
+RUN chmod +x /start.sh
+
 # Create non-root user
 RUN useradd -ms /bin/bash django
 USER django
@@ -14,12 +17,13 @@ WORKDIR /home/django/code
 
 # Install dependencies
 COPY requirements requirements
-RUN pip install -r /requirements/production.txt
-
+RUN pip install -r requirements/production.txt
 
 # Copy project
 COPY . .
 
-CMD ["python", "manage.py", "migrate", "--settings=config.settings.production"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0", "--settings=config.settings.production"]
+
+
+
+
 

@@ -13,7 +13,7 @@ git clone git@github.com:Kepins/An-application-that-automates-the-configuration-
 
 3. Create superuser
 ```
-docker compose run django python manage.py createsuperuser
+docker compose -f=local.yml run django python manage.py createsuperuser
 ```
 4. Run docker compose
 ```
