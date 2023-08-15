@@ -1,7 +1,14 @@
+import json
+
 from django.test import TestCase
 from rest_framework import status
 
-from config.application.tests.factories import setup_test_environment, DeviceFactory
+from config.application.models import Device
+from config.application.tests.factories import (
+    setup_test_environment,
+    DeviceFactory,
+    PublicKeyFactory,
+)
 
 
 def assert_device_matches_json(test_case, device, device_json):
@@ -54,3 +61,67 @@ class GetDeviceListTest(TestCase):
         self.assertEquals(len(resp.json()), NUM_DEVICES)
         for i in range(NUM_DEVICES):
             assert_device_matches_json(self, devices[i], resp.json()[i])
+
+
+class PostDeviceListTest(TestCase):
+    def setUp(self):
+        setup_test_environment()
+        self.key_content = "ssh-rsa AABBB3NzaC1yc2EAAAADAQABAAACAQDz+uXxmJnI0vHe9ym2yBSuoOkhStNg4cN2P7gGUD7TFe7KmpAsvS5l7YLcLfdpNSP5oJKdBpoCvn3WCA3xVCg/tZlxMcDfDRnhPEwtLqKEysSe5Djp62nxWzV39AphZcytfZSB3BejhddPWoqH39tkYY7Qk3wa/KBPFVXGghK0bII2yjIQlOrJWWHsa/rC6+7gVq2skPuGlxHeWP4th2twgrBJhql+cw0m71ynx2zdXnZSDD9kG/JcJc2DeB1dD1RTckK/wmghxlsfRJxvB59RJehrKJNwe94n6EGcRLkASzWt/cSmJib0gbhRIoPnU0HELNtqyv0mSuFiz2IF1yeWrd53ufb9+ZiYeJfM99+vIf2nShODat3QeK1OVsMEpz+VGkTPyQcxRUJMQhFG2JBLXpsrNxYnTjXZqjmEDglm44M/YVNEYxyYodGqNgaOlx6v/seNg/swr2Yn9u0f75k90xTIuwnHGjPVjpBvH6f4UXQyOWCtTshyXFRDdsOsXD90EhEuec/+CMjbREGf0v8wp7PxYVOBhPddXQH+RW5YEA1te/ZjPVdTt0P0MhuSLOzQuTZcDISuS2iCSx+nk0QjSh50iHWBafZBva6fvT+6oFtwMYPeFdna5OeMSQ960eS2VIxIIjs34A2aT7YrQwo42JtBIWH8por3SAjwazxm2Q== user@example.com"
+
+    def test_public_key_empty(self):
+        device = DeviceFactory.build()
+        device.public_key = None
+
+        resp = self.client.post(
+            "/api/devices/",
+            content_type="application/json",
+            data=json.dumps(
+                {
+                    "name": device.name,
+                    "hostname": device.hostname,
+                }
+            ),
+        )
+        self.assertEquals(resp.status_code, status.HTTP_201_CREATED)
+        device.id = resp.json()["id"]
+        assert_device_matches_json(self, device, resp.json())
+
+    def test_public_key_doesnt_exist(self):
+        device = DeviceFactory.build()
+        device.public_key = PublicKeyFactory.build()
+        device.public_key.key_content = self.key_content
+
+        resp = self.client.post(
+            "/api/devices/",
+            content_type="application/json",
+            data=json.dumps(
+                {
+                    "name": device.name,
+                    "hostname": device.hostname,
+                    "key_content": device.public_key.key_content,
+                }
+            ),
+        )
+        self.assertEquals(resp.status_code, status.HTTP_201_CREATED)
+        device.id = resp.json()["id"]
+        assert_device_matches_json(self, device, resp.json())
+
+    def test_public_key_already_exists(self):
+        public_key = PublicKeyFactory()
+        public_key.save()
+        device = DeviceFactory.build(public_key=public_key)
+
+        resp = self.client.post(
+            "/api/devices/",
+            content_type="application/json",
+            data=json.dumps(
+                {
+                    "name": device.name,
+                    "hostname": device.hostname,
+                    "key_content": device.public_key.key_content,
+                }
+            ),
+        )
+        self.assertEquals(resp.status_code, status.HTTP_201_CREATED)
+        device.id = resp.json()["id"]
+        assert_device_matches_json(self, device, resp.json())
