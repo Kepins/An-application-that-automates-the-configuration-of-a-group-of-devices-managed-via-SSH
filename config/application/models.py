@@ -26,7 +26,7 @@ class PublicKey(models.Model):
     # type = models.CharField(choices=TypeOfKey.choices)
 
     """ssh-key file content (That COULD be stripped of the comment at the end)"""
-    key_content = models.BinaryField(
+    key_content = models.TextField(
         max_length=1024,
         unique=True,
     )  # 1024 is an arbitrary number
