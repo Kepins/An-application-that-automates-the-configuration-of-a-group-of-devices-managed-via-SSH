@@ -1,8 +1,11 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 
-from .models import Device, PublicKey
-from .serializers import DeviceSerializer, PublicKeySerializer
+
+from application.api.serializers.DeviceSerializer import DeviceSerializer
+from application.api.serializers.PublicKeySerializer import PublicKeySerializer
+from application.models.Device import Device
+from application.models.PublicKey import PublicKey
 
 
 class DeviceList(generics.ListCreateAPIView):

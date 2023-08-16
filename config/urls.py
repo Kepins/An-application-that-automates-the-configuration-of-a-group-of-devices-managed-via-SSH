@@ -18,7 +18,7 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 
-from .application.urls import urlpatterns as application_urlpatterns
+from application.urls import urlpatterns as application_urlpatterns
 
 urlpatterns = [
     path("api/", include(application_urlpatterns)),

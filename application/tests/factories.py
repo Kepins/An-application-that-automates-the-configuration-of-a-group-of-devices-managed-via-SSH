@@ -1,10 +1,7 @@
-import string
-from collections import namedtuple
-
 import factory
 import factory.random
 
-from config.application.models import PublicKey, Device
+from application.models.models import PublicKey, Device
 
 
 def setup_test_environment():

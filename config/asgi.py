@@ -17,4 +17,3 @@ load_dotenv(os.path.join(dirname(dirname(__file__)), ".env"))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 application = get_asgi_application()
-

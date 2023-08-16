@@ -1,12 +1,6 @@
 from rest_framework import serializers
 
-from config.application.models import Device, PublicKey
-
-
-class PublicKeySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PublicKey
-        fields = "__all__"
+from application.models.Device import Device, PublicKey
 
 
 class DeviceSerializer(serializers.ModelSerializer):
