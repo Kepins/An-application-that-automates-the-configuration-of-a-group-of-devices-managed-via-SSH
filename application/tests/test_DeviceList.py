@@ -15,11 +15,9 @@ def assert_device_matches_json(test_case, device, device_json):
     test_case.assertEquals(device_json["name"], device.name)
     test_case.assertEquals(device_json["hostname"], device.hostname)
     if device.public_key:
-        test_case.assertEquals(
-            device_json["key_content"], device.public_key.key_content
-        )
+        test_case.assertEquals(device_json["public_key"], device.public_key.id)
     else:
-        test_case.assertEquals(device_json["key_content"], None)
+        test_case.assertEquals(device_json["public_key"], None)
 
 
 class GetDeviceListTest(TestCase):
@@ -87,8 +85,6 @@ class PostDeviceListTest(TestCase):
 
     def test_public_key_doesnt_exist(self):
         device = DeviceFactory.build()
-        device.public_key = PublicKeyFactory.build()
-        device.public_key.key_content = self.key_content
 
         resp = self.client.post(
             "/api/devices/",
@@ -97,15 +93,13 @@ class PostDeviceListTest(TestCase):
                 {
                     "name": device.name,
                     "hostname": device.hostname,
-                    "key_content": device.public_key.key_content,
+                    "public_key": 1,
                 }
             ),
         )
-        self.assertEquals(resp.status_code, status.HTTP_201_CREATED)
-        device.id = resp.json()["id"]
-        assert_device_matches_json(self, device, resp.json())
+        self.assertEquals(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_public_key_already_exists(self):
+    def test_public_key_exists(self):
         public_key = PublicKeyFactory()
         public_key.save()
         device = DeviceFactory.build(public_key=public_key)
@@ -117,7 +111,7 @@ class PostDeviceListTest(TestCase):
                 {
                     "name": device.name,
                     "hostname": device.hostname,
-                    "key_content": device.public_key.key_content,
+                    "public_key": public_key.id,
                 }
             ),
         )
