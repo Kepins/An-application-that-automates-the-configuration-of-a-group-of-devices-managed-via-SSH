@@ -21,10 +21,6 @@ services:
       POSTGRES_USER: diploma_user
       POSTGRES_PASSWORD: password
 
-
-
-
-
 volumes:
   postgres_data:
 
