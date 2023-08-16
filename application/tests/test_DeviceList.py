@@ -77,6 +77,8 @@ class PostDeviceListTest(TestCase):
                     "name": device.name,
                     "hostname": device.hostname,
                     "public_key": None,
+                    "port": device.port,
+                    "password": device.password,
                 }
             ),
         )
@@ -95,6 +97,8 @@ class PostDeviceListTest(TestCase):
                     "name": device.name,
                     "hostname": device.hostname,
                     "public_key": 1,
+                    "port": device.port,
+                    "password": device.password,
                 }
             ),
         )
@@ -113,6 +117,8 @@ class PostDeviceListTest(TestCase):
                     "name": device.name,
                     "hostname": device.hostname,
                     "public_key": public_key.id,
+                    "port": device.port,
+                    "password": device.password,
                 }
             ),
         )

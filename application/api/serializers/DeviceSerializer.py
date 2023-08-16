@@ -9,4 +9,8 @@ class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Device
         fields = "__all__"
-        extra_kwargs = {"public_key": {"required": True}}
+        extra_kwargs = {
+            "port": {"required": True},
+            "public_key": {"required": True},
+            "password": {"required": True},
+        }

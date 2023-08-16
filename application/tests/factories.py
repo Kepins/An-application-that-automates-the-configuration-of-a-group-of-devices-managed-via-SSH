@@ -24,4 +24,6 @@ class DeviceFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: f"Device name {n}")
     hostname = factory.Sequence(lambda n: f"device{1}.example.com")
+    port = 22
     public_key = factory.SubFactory(PublicKeyFactory)
+    password = None
