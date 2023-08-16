@@ -76,6 +76,7 @@ class PostDeviceListTest(TestCase):
                 {
                     "name": device.name,
                     "hostname": device.hostname,
+                    "public_key": None,
                 }
             ),
         )
