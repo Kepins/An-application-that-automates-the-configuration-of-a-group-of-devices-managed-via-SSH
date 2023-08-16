@@ -4,7 +4,7 @@ services:
   django:
     build:
       context: .
-      dockerfile: docker/django/production/Dockerfile
+      dockerfile: docker/django/test/Dockerfile
     volumes:
       - .:/home/django/code
     ports:
