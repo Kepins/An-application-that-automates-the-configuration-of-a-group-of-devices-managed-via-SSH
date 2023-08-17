@@ -1,6 +1,7 @@
 __pycache__/
 #enviroments
 .env
+.env.local
 # pycharm
 .idea/
 #static
