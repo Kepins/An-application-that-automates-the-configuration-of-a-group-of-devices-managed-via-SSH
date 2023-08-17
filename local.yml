@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: docker/django/local/Dockerfile
     volumes:
-      - .:/diploma/app
+      - .:/home/django/app
     ports:
       - "8000:8000"
     environment:

@@ -9,6 +9,12 @@ ENV DJANGO_SETTINGS_MODULE config.settings.local
 COPY ./docker/django/local/start.sh /start.sh
 RUN chmod +x /start.sh
 
+# Create non-root user
+RUN useradd -ms /bin/bash django
+USER django
+
+# Set work directory
+WORKDIR /home/django/app
 
 # Set work directory
 WORKDIR /diploma/app
