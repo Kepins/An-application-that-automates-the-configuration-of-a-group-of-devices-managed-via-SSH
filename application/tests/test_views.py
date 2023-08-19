@@ -1,14 +1,8 @@
 import json
 
-from django.urls import reverse
 from rest_framework.test import APIClient, APITestCase
 
-from devices.tests.factory import UserFactory
-#user poprawnie zalogowany
-
-#user z blednym haslem
-
-#user z blednym loginem
+from application.tests.factory import UserFactory, ScriptFactory
 
 
 class TestLoginUser(APITestCase):
@@ -48,6 +42,16 @@ class TestLoginUser(APITestCase):
 
         self.assertEqual(401, response.status_code)
         self.assertEqual("No active account found with the given credentials", res_content['detail'])
+
+
+class TestScriptApiViews(APITestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.test_script = ScriptFactory()
+
+
+
 
 
 

@@ -4,6 +4,11 @@ from application.api.serializers.script_serializer import ScriptSerializer
 from application.models import Script
 
 
-class ScriptList(generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView ):
+class ScriptListCreateAPIView(generics.ListCreateAPIView):
     queryset = Script.objects.all()
-    serializer = ScriptSerializer
+    serializer_class = ScriptSerializer
+
+
+class ScriptDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Script.objects.all()
+    serializer_class = ScriptSerializer

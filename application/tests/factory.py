@@ -1,6 +1,6 @@
 from factory import django, Sequence, PostGenerationMethodCall
 
-from devices.models.custom_user import CustomUser
+from application.models import CustomUser, Script
 
 class UserFactory(django.DjangoModelFactory):
     class Meta:
@@ -9,3 +9,11 @@ class UserFactory(django.DjangoModelFactory):
     username = Sequence(lambda n: "testuser%s@test.com" % n)
     email = Sequence(lambda n: "testuser%s@test.com" % n)
     password = PostGenerationMethodCall("set_password", "password")
+
+
+class ScriptFactory(django.DjangoModelFactory):
+    class Meta:
+        model = Script
+
+    name = Sequence(lambda n: "name-%s" % n)
+    script = Sequence(lambda n: "test_content-%s" % n)
