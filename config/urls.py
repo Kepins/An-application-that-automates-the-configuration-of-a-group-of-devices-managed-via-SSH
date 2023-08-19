@@ -11,6 +11,7 @@ from rest_framework_simplejwt.views import (
 from application.api.views.device import DeviceViewSet
 from application.api.views.public_key import PublicKeyViewSet
 from application.api.views.group import GroupKeyViewSet
+from application.api.views.custom_user import RegisterView
 from application.api.views.script import ScriptViewSet
 
 router = DefaultRouter()
@@ -24,6 +25,7 @@ urlpatterns = [
     path("api-token-auth/", TokenObtainPairView.as_view()),
     path("api-token-refresh/", TokenRefreshView.as_view()),
     path("api/", include((router.urls, "api"), namespace="api")),
+    path("auth/register/", RegisterView.as_view(), name='register'),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 

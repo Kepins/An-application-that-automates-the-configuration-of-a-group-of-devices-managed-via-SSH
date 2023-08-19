@@ -4,11 +4,50 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APITestCase
 
-from application.models import Script
+from application.models import Script, CustomUser
 from application.tests.factory import UserFactory, ScriptFactory
 
 
+class TestRegisterApiView(APITestCase):
+
+    def test_register(self):
+        url = reverse('register')
+        data = {
+            'username': 'newuser',
+            'password': 'NewPassword123',
+            'password2': 'NewPassword123',
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(CustomUser.objects.count(), 1)
+        self.assertEqual(CustomUser.objects.get().username, 'newuser')
+
+    def test_register_existing_username(self):
+        CustomUser.objects.create_user(username='existinguser', password='ExistingPassword123')
+        url = reverse('register')  # Use the actual URL name from your urls.py
+        data = {
+            'username': 'existinguser',
+            'password': 'NewPassword123',
+            'password2': 'NewPassword123',
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(CustomUser.objects.count(), 1)
+
+    def test_register_missing_fields(self):
+        url = reverse('register')
+        data = {
+            'username': 'newuser',
+            'password': 'NewPassword123',
+            # 'password2' is missing
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(CustomUser.objects.count(), 0)
+
+
 class TestLoginUser(APITestCase):
+
     @classmethod
     def setUpTestData(cls):
         cls.password = "test_pass"
@@ -84,6 +123,7 @@ class ScriptListCreateAPIView(APITestCase):
         Script.objects.all().delete()  # Remove all scripts
 
         response = self.client.get(reverse('api:scripts-list'))
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
 
@@ -92,6 +132,7 @@ class ScriptListCreateAPIView(APITestCase):
             'name': 'New Script',
             'script': 'Script content',
         }
+
         response = self.client.post(reverse('api:scripts-list'), data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -102,6 +143,7 @@ class ScriptListCreateAPIView(APITestCase):
             'name': 'A very long title that exceeds the maximum character limit of 100 characters. ' * 2,
             'script': 'Script content',
         }
+
         response = self.client.post(reverse('api:scripts-list'), data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -110,14 +152,18 @@ class ScriptListCreateAPIView(APITestCase):
     def test_delete_script(self):
         script_to_delete = self.test_script_1
         url = reverse('api:scripts-detail', args=[script_to_delete.pk])
+
         response = self.client.delete(url)
+
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Script.objects.filter(pk=script_to_delete.pk).exists())
 
     def test_delete_nonexistent_script(self):
         nonexistent_script_pk = 9999
         url = reverse('api:scripts-detail', args=[nonexistent_script_pk])
+
         response = self.client.delete(url)
+
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_script(self):
@@ -127,9 +173,11 @@ class ScriptListCreateAPIView(APITestCase):
             'name': 'Updated Title',
             'script': 'Updated Content',
         }
+
         response = self.client.put(url, data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
         script_to_update.refresh_from_db()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(script_to_update.name, data['name'])
         self.assertEqual(script_to_update.script, data['script'])
 
@@ -140,7 +188,9 @@ class ScriptListCreateAPIView(APITestCase):
             'name': 'Updated Title',
             'script': 'Updated Content',
         }
+
         response = self.client.put(url, data)
+
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_validation_error(self):
@@ -150,7 +200,9 @@ class ScriptListCreateAPIView(APITestCase):
             'name': 'A very long title that exceeds the maximum character limit of 100 characters. ' * 2,
             'script': 'Updated Content',
         }
+
         response = self.client.put(url, data)
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('name', response.data)
         self.assertIn('Ensure this field has no more than 100 characters.', response.data['name'])
@@ -158,7 +210,9 @@ class ScriptListCreateAPIView(APITestCase):
     def test_retrieve_script(self):
         script_to_retrieve = self.test_script_1
         url = reverse('api:scripts-detail', args=[script_to_retrieve.pk])
+
         response = self.client.get(url)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], script_to_retrieve.name)
         self.assertEqual(response.data['script'], script_to_retrieve.script)
@@ -166,7 +220,9 @@ class ScriptListCreateAPIView(APITestCase):
     def test_retrieve_nonexistent_script(self):
         nonexistent_script_pk = 9999  # A PK that does not exist
         url = reverse('api:scripts-detail', args=[nonexistent_script_pk])
+
         response = self.client.get(url)
+
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
