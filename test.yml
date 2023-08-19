@@ -12,7 +12,7 @@ services:
     depends_on:
       - database
   database:
-    image: postgres:14
+    image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
