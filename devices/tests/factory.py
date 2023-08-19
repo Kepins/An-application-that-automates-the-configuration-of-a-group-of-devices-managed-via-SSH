@@ -1,4 +1,4 @@
-from factory import django, Sequence
+from factory import django, Sequence, PostGenerationMethodCall
 
 from devices.models.custom_user import CustomUser
 
