@@ -5,9 +5,11 @@ from django.conf import settings
 from rest_framework.routers import DefaultRouter
 
 from application.api.views.device import DeviceViewSet
+from application.api.views.public_key import PublicKeyViewSet
 
 router = DefaultRouter()
 router.register(r"devices", DeviceViewSet, basename="devices")
+router.register(r"keys", PublicKeyViewSet, basename="keys")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
