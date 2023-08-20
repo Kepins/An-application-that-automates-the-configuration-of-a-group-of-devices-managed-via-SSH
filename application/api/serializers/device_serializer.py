@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from application.models.Device import Device, PublicKey
+from application.models.device import Device
 
 
 class DeviceSerializer(serializers.ModelSerializer):

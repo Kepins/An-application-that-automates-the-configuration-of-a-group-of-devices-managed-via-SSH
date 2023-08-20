@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from .PublicKey import PublicKey
+from .public_key import PublicKey
 
 
 class Device(models.Model):

@@ -1,8 +1,8 @@
 import factory
 import factory.random
 
-from application.models.Device import Device
-from application.models.PublicKey import PublicKey
+from application.models.device import Device
+from application.models.public_key import PublicKey
 
 
 def setup_test_environment():
