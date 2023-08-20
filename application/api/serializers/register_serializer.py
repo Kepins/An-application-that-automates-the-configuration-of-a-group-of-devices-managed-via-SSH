@@ -17,9 +17,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
-        if User.objects.filter(username=attrs['username']).exists():
+        if User.objects.exists():
             raise serializers.ValidationError(
-                {"username": "This username is already taken."}
+                {"fail": "Only one can exist in database."}
             )
         if attrs["password"] != attrs["password2"]:
             raise serializers.ValidationError(

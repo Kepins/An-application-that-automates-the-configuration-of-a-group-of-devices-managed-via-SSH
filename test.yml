@@ -2,7 +2,7 @@ version: "3.9"
 
 name: diploma-test
 services:
-  django_test:
+  django:
     build:
       context: .
       dockerfile: docker/django/test/Dockerfile

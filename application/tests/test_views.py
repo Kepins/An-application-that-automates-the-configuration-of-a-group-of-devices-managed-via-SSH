@@ -22,8 +22,8 @@ class TestRegisterApiView(APITestCase):
         self.assertEqual(CustomUser.objects.count(), 1)
         self.assertEqual(CustomUser.objects.get().username, 'newuser')
 
-    def test_register_existing_username(self):
-        CustomUser.objects.create_user(username='existinguser', password='ExistingPassword123')
+    def test_register_existing_user(self):
+        UserFactory()
         url = reverse('register')  # Use the actual URL name from your urls.py
         data = {
             'username': 'existinguser',
