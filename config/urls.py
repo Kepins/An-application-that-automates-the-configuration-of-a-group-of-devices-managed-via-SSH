@@ -18,14 +18,12 @@ router = DefaultRouter()
 router.register(r"devices", DeviceViewSet, basename="devices")
 router.register(r"keys", PublicKeyViewSet, basename="keys")
 router.register(r"groups", GroupKeyViewSet, basename="groups")
-router.register(r'scripts', ScriptViewSet, basename='scripts')
+router.register(r"scripts", ScriptViewSet, basename="scripts")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api-token-auth/", TokenObtainPairView.as_view()),
     path("api-token-refresh/", TokenRefreshView.as_view()),
     path("api/", include((router.urls, "api"), namespace="api")),
-    path("auth/register/", RegisterView.as_view(), name='register'),
-]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-
+    path("auth/register/", RegisterView.as_view(), name="register"),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

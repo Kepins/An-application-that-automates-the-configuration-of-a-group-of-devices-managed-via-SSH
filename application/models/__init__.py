@@ -1,5 +1,4 @@
-__all__ = ["Device", "Group", "PublicKey", "CustomUser",
-    "Script"]
+__all__ = ["Device", "Group", "PublicKey", "CustomUser", "Script"]
 
 from .custom_user import CustomUser
 from .device import Device
