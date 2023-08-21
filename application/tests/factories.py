@@ -3,6 +3,7 @@ import factory.random
 
 from application.models.device import Device
 from application.models.public_key import PublicKey
+from application.models import Group
 
 
 def setup_test_environment():
@@ -27,3 +28,22 @@ class DeviceFactory(factory.django.DjangoModelFactory):
     port = 22
     public_key = factory.SubFactory(PublicKeyFactory)
     password = None
+
+
+class GroupFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Group
+
+    name = factory.Sequence(lambda n: f"Group name {n}")
+    public_key = factory.SubFactory(PublicKeyFactory)
+
+    @factory.post_generation
+    def devices(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of devices were passed in, use them
+            for device in extracted:
+                self.devices.add(device)
