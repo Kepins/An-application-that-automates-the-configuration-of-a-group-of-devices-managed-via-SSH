@@ -281,7 +281,7 @@ class AddDevicesGroupTest(TestCase):
         group = GroupFactory()
         group.save()
 
-        resp = self.client.post(
+        resp = self.client.patch(
             f"/api/groups/{group.id}/add_devices/",
             content_type="application/json",
             data=json.dumps(
@@ -298,7 +298,7 @@ class AddDevicesGroupTest(TestCase):
         group = GroupFactory(devices=[self.devices[4]])
         group.save()
 
-        resp = self.client.post(
+        resp = self.client.patch(
             f"/api/groups/{group.id}/add_devices/",
             content_type="application/json",
             data=json.dumps(
@@ -315,7 +315,7 @@ class AddDevicesGroupTest(TestCase):
         group = GroupFactory(devices=[self.devices[2]])
         group.save()
 
-        resp = self.client.post(
+        resp = self.client.patch(
             f"/api/groups/{group.id}/add_devices/",
             content_type="application/json",
             data=json.dumps(
@@ -333,7 +333,7 @@ class AddDevicesGroupTest(TestCase):
         )
         group.save()
 
-        resp = self.client.post(
+        resp = self.client.patch(
             f"/api/groups/{group.id}/add_devices/",
             content_type="application/json",
             data=json.dumps(
@@ -345,11 +345,11 @@ class AddDevicesGroupTest(TestCase):
         self.assertEquals(resp.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEquals(len(group.devices.all()), 3)
 
-    def test_patch(self):
+    def test_post(self):
         group = GroupFactory(devices=[self.devices[4]])
         group.save()
 
-        resp = self.client.patch(
+        resp = self.client.post(
             f"/api/groups/{group.id}/add_devices/",
             content_type="application/json",
             data=json.dumps(
@@ -387,7 +387,7 @@ class DeleteDevicesGroupTest(TestCase):
         group = GroupFactory()
         group.save()
 
-        resp = self.client.post(
+        resp = self.client.patch(
             f"/api/groups/{group.id}/remove_devices/",
             content_type="application/json",
             data=json.dumps(
@@ -405,7 +405,7 @@ class DeleteDevicesGroupTest(TestCase):
         )
         group.save()
 
-        resp = self.client.post(
+        resp = self.client.patch(
             f"/api/groups/{group.id}/remove_devices/",
             content_type="application/json",
             data=json.dumps(
@@ -425,7 +425,7 @@ class DeleteDevicesGroupTest(TestCase):
         )
         group.save()
 
-        resp = self.client.post(
+        resp = self.client.patch(
             f"/api/groups/{group.id}/remove_devices/",
             content_type="application/json",
             data=json.dumps(
@@ -443,7 +443,7 @@ class DeleteDevicesGroupTest(TestCase):
         )
         group.save()
 
-        resp = self.client.post(
+        resp = self.client.patch(
             f"/api/groups/{group.id}/remove_devices/",
             content_type="application/json",
             data=json.dumps(
@@ -455,11 +455,11 @@ class DeleteDevicesGroupTest(TestCase):
         self.assertEquals(resp.status_code, status.HTTP_200_OK)
         self.assertEquals(len(group.devices.all()), 0)
 
-    def test_patch(self):
+    def test_post(self):
         group = GroupFactory(devices=[self.devices[0]])
         group.save()
 
-        resp = self.client.patch(
+        resp = self.client.post(
             f"/api/groups/{group.id}/remove_devices/",
             content_type="application/json",
             data=json.dumps(

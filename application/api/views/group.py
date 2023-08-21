@@ -24,7 +24,7 @@ class GroupKeyViewSet(viewsets.ModelViewSet):
             return self.serializer_remove_devices
         return self.serializer_class
 
-    @action(detail=True, methods=["POST"])
+    @action(detail=True, methods=["PATCH"])
     def add_devices(self, request, pk):
         serializer = self.get_serializer(self.get_object(), data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -32,7 +32,7 @@ class GroupKeyViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data, status.HTTP_200_OK)
 
-    @action(detail=True, methods=["POST"])
+    @action(detail=True, methods=["PATCH"])
     def remove_devices(self, request, pk):
         serializer = self.get_serializer(self.get_object(), data=request.data)
         serializer.is_valid(raise_exception=True)
