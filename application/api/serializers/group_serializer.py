@@ -18,7 +18,6 @@ class GroupSerializer(serializers.ModelSerializer):
 class GroupAddDevicesSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     name = serializers.ReadOnlyField()
-    public_key = serializers.ReadOnlyField()
 
     def validate_devices(self, devices):
         if any(device in self.instance.devices.all() for device in devices):
@@ -30,13 +29,13 @@ class GroupAddDevicesSerializer(serializers.ModelSerializer):
         fields = "__all__"
         extra_kwargs = {
             "devices": {"required": True},
+            "public_key": {"read_only": True},
         }
 
 
 class GroupRemoveDevicesSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     name = serializers.ReadOnlyField()
-    public_key = serializers.ReadOnlyField()
 
     def validate_devices(self, devices):
         if any(device not in self.instance.devices.all() for device in devices):
@@ -49,4 +48,5 @@ class GroupRemoveDevicesSerializer(serializers.ModelSerializer):
         fields = "__all__"
         extra_kwargs = {
             "devices": {"required": True},
+            "public_key": {"read_only": True},
         }
