@@ -1,5 +1,6 @@
 from .base import *
 
+
 class DisableMigrations:
     def __contains__(self, item):
         return True
