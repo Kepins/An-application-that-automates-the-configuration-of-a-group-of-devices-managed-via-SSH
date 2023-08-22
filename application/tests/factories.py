@@ -1,13 +1,11 @@
 import factory
-import factory.random
+from factory import random, Sequence, PostGenerationMethodCall
 
-from application.models.device import Device
-from application.models.public_key import PublicKey
-from application.models import Group
+from application.models import Group, CustomUser, Script, PublicKey, Device
 
 
 def setup_test_environment():
-    factory.random.reseed_random("my_seed")
+    random.reseed_random("my_seed")
     DeviceFactory.reset_sequence()
 
 
@@ -47,3 +45,20 @@ class GroupFactory(factory.django.DjangoModelFactory):
             # A list of devices were passed in, use them
             for device in extracted:
                 self.devices.add(device)
+
+
+class UserFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = CustomUser
+
+    username = Sequence(lambda n: "testuser%s@test.com" % n)
+    email = Sequence(lambda n: "testuser%s@test.com" % n)
+    password = PostGenerationMethodCall("set_password", "password")
+
+
+class ScriptFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Script
+
+    name = Sequence(lambda n: "name-%s" % n)
+    script = Sequence(lambda n: "test_content-%s" % n)
