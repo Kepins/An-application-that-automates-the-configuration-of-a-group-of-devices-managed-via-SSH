@@ -13,10 +13,10 @@ from application.tests.factories import (
 def assert_group_matches_json(test_case, group, group_json):
     test_case.assertEquals(group_json["id"], group.id)
     test_case.assertEquals(group_json["name"], group.name)
-    if group.public_key:
-        test_case.assertEquals(group_json["public_key"], group.public_key.id)
+    if group.key_pair:
+        test_case.assertEquals(group_json["key_pair"], group.key_pair.id)
     else:
-        test_case.assertEquals(group_json["public_key"], None)
+        test_case.assertEquals(group_json["key_pair"], None)
     test_case.assertEquals(len(group.devices.all()), len(group_json["devices"]))
     for device_id in group_json["devices"]:
         test_case.assertTrue(group.devices.filter(pk=device_id).exists())
@@ -75,7 +75,7 @@ class PostGroupListTest(TestCase):
             data=json.dumps(
                 {
                     "name": group.name,
-                    "public_key": None,
+                    "key_pair": None,
                     "devices": [],
                 }
             ),
@@ -94,7 +94,7 @@ class PostGroupListTest(TestCase):
             data=json.dumps(
                 {
                     "name": group.name,
-                    "public_key": None,
+                    "key_pair": None,
                     "devices": [device.id for device in devices],
                 }
             ),
@@ -112,7 +112,7 @@ class PostGroupListTest(TestCase):
             data=json.dumps(
                 {
                     "name": group.name,
-                    "public_key": None,
+                    "key_pair": None,
                 }
             ),
         )
@@ -127,7 +127,7 @@ class PostGroupListTest(TestCase):
             data=json.dumps(
                 {
                     "name": group.name,
-                    "public_key": 1,
+                    "key_pair": 1,
                     "devices": [],
                 }
             ),
@@ -183,7 +183,7 @@ class PutDeviceDetailTest(TestCase):
             data=json.dumps(
                 {
                     "name": new_group.name,
-                    "public_key": None,
+                    "key_pair": None,
                 }
             ),
         )
@@ -192,7 +192,7 @@ class PutDeviceDetailTest(TestCase):
     def test_all_fields(self):
         group = GroupFactory()
         group.save()
-        new_group = GroupFactory.build(name="NEW NAME", public_key=None)
+        new_group = GroupFactory.build(name="NEW NAME", key_pair=None)
         devices = [DeviceFactory(name="Device1111"), DeviceFactory(port=2222)]
 
         resp = self.client.put(
@@ -201,7 +201,7 @@ class PutDeviceDetailTest(TestCase):
             data=json.dumps(
                 {
                     "name": new_group.name,
-                    "public_key": new_group.public_key,
+                    "key_pair": new_group.key_pair,
                     "devices": [device.id for device in devices],
                 }
             ),
@@ -218,7 +218,7 @@ class PatchDeviceDetailTest(TestCase):
     def test_not_all_fields(self):
         group = GroupFactory()
         group.save()
-        new_group = GroupFactory.build(name="NEW NAME", public_key=group.public_key)
+        new_group = GroupFactory.build(name="NEW NAME", key_pair=group.key_pair)
 
         resp = self.client.patch(
             f"/api/groups/{group.id}/",

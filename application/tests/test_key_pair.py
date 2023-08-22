@@ -3,12 +3,17 @@ import json
 from django.test import TestCase
 from rest_framework import status
 
-from application.tests.factories import setup_test_environment, PublicKeyFactory
+from application.tests.factories import setup_test_environment, KeyPairFactory
 
 
-def assert_public_key_matches_json(test_case, public_key, public_key_json):
-    test_case.assertEquals(public_key_json["id"], public_key.id)
-    test_case.assertEquals(public_key_json["key_content"], public_key.key_content)
+def assert_key_pair_matches_json(test_case, key_pair, key_pair_json):
+    test_case.assertEquals(key_pair_json["id"], key_pair.id)
+    test_case.assertEquals(
+        key_pair_json["private_key_content"], key_pair.private_key_content
+    )
+    test_case.assertEquals(
+        key_pair_json["public_key_content"], key_pair.public_key_content
+    )
 
 
 class GetPublicKeyListTest(TestCase):
@@ -23,24 +28,26 @@ class GetPublicKeyListTest(TestCase):
         self.assertEquals(len(resp.json()), 0)
 
     def test_one(self):
-        public_key = PublicKeyFactory()
-        public_key.save()
+        key_pair = KeyPairFactory()
+        key_pair.save()
 
         resp = self.client.get(
             "/api/keys/",
         )
         self.assertEquals(resp.status_code, status.HTTP_200_OK)
         self.assertEquals(len(resp.json()), 1)
-        assert_public_key_matches_json(self, public_key, resp.json()[0])
+        assert_key_pair_matches_json(self, key_pair, resp.json()[0])
 
     def test_many(self):
         NUM_KEYS = 10
-        public_keys = {}
+        key_pairs = {}
 
         for i in range(NUM_KEYS):
-            public_key = PublicKeyFactory(key_content=str(i))
-            public_key.save()
-            public_keys[public_key.id] = public_key
+            key_pair = KeyPairFactory(
+                public_key_content=str(i), private_key_content=str(i)
+            )
+            key_pair.save()
+            key_pairs[key_pair.id] = key_pair
 
         resp = self.client.get(
             "/api/keys/",
@@ -49,7 +56,7 @@ class GetPublicKeyListTest(TestCase):
         self.assertEquals(len(resp.json()), NUM_KEYS)
         for i in range(NUM_KEYS):
             id = resp.json()[i]["id"]
-            assert_public_key_matches_json(self, public_keys[id], resp.json()[i])
+            assert_key_pair_matches_json(self, key_pairs[id], resp.json()[i])
 
 
 class PostPublicKeyListTest(TestCase):
@@ -57,39 +64,41 @@ class PostPublicKeyListTest(TestCase):
         setup_test_environment()
 
     def test_new(self):
-        public_key = PublicKeyFactory.build()
+        key_pair = KeyPairFactory.build()
 
         resp = self.client.post(
             "/api/keys/",
             content_type="application/json",
             data=json.dumps(
                 {
-                    "key_content": public_key.key_content,
+                    "private_key_content": key_pair.private_key_content,
+                    "public_key_content": key_pair.public_key_content,
                 }
             ),
         )
         self.assertEquals(resp.status_code, status.HTTP_201_CREATED)
-        public_key.id = resp.json()["id"]
-        assert_public_key_matches_json(self, public_key, resp.json())
+        key_pair.id = resp.json()["id"]
+        assert_key_pair_matches_json(self, key_pair, resp.json())
 
     def test_exists(self):
-        public_key = PublicKeyFactory.build()
-        public_key.save()
+        key_pair = KeyPairFactory.build()
+        key_pair.save()
 
         resp = self.client.post(
             "/api/keys/",
             content_type="application/json",
             data=json.dumps(
                 {
-                    "key_content": public_key.key_content,
+                    "private_key_content": key_pair.private_key_content,
+                    "public_key_content": key_pair.public_key_content,
                 }
             ),
         )
         self.assertEquals(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_no_content(self):
-        public_key = PublicKeyFactory.build()
-        public_key.save()
+        key_pair = KeyPairFactory.build()
+        key_pair.save()
 
         resp = self.client.post(
             "/api/keys/",
@@ -110,14 +119,14 @@ class GetPublicKeyDetail(TestCase):
         self.assertEquals(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_exists(self):
-        public_key = PublicKeyFactory()
-        public_key.save()
+        key_pair = KeyPairFactory()
+        key_pair.save()
 
         resp = self.client.get(
-            f"/api/keys/{public_key.id}/",
+            f"/api/keys/{key_pair.id}/",
         )
         self.assertEquals(resp.status_code, status.HTTP_200_OK)
-        assert_public_key_matches_json(self, public_key, resp.json())
+        assert_key_pair_matches_json(self, key_pair, resp.json())
 
 
 class PutPublicKeyDetailTest(TestCase):
@@ -131,23 +140,26 @@ class PutPublicKeyDetailTest(TestCase):
         self.assertEquals(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_all_fields(self):
-        public_key = PublicKeyFactory()
-        public_key.save()
+        key_pair = KeyPairFactory()
+        key_pair.save()
 
-        new_public_key = PublicKeyFactory.build(key_content="12345")
+        new_key_pair = KeyPairFactory.build(
+            public_key_content="12345", private_key_content="54321"
+        )
 
         resp = self.client.put(
-            f"/api/keys/{public_key.id}/",
+            f"/api/keys/{key_pair.id}/",
             content_type="application/json",
             data=json.dumps(
                 {
-                    "key_content": new_public_key.key_content,
+                    "private_key_content": new_key_pair.private_key_content,
+                    "public_key_content": new_key_pair.public_key_content,
                 }
             ),
         )
         self.assertEquals(resp.status_code, status.HTTP_200_OK)
-        new_public_key.id = resp.json()["id"]
-        assert_public_key_matches_json(self, new_public_key, resp.json())
+        new_key_pair.id = resp.json()["id"]
+        assert_key_pair_matches_json(self, new_key_pair, resp.json())
 
 
 class PatchPublicKeyDetailTest(TestCase):
@@ -161,23 +173,26 @@ class PatchPublicKeyDetailTest(TestCase):
         self.assertEquals(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_all_fields(self):
-        public_key = PublicKeyFactory()
-        public_key.save()
+        key_pair = KeyPairFactory()
+        key_pair.save()
 
-        new_public_key = PublicKeyFactory.build(key_content="12345")
+        new_key_pair = KeyPairFactory.build(
+            public_key_content="12345", private_key_content="54321"
+        )
 
         resp = self.client.patch(
-            f"/api/keys/{public_key.id}/",
+            f"/api/keys/{key_pair.id}/",
             content_type="application/json",
             data=json.dumps(
                 {
-                    "key_content": new_public_key.key_content,
+                    "private_key_content": new_key_pair.private_key_content,
+                    "public_key_content": new_key_pair.public_key_content,
                 }
             ),
         )
         self.assertEquals(resp.status_code, status.HTTP_200_OK)
-        new_public_key.id = resp.json()["id"]
-        assert_public_key_matches_json(self, new_public_key, resp.json())
+        new_key_pair.id = resp.json()["id"]
+        assert_key_pair_matches_json(self, new_key_pair, resp.json())
 
 
 class DeletePublicKeyDetailTest(TestCase):
@@ -191,9 +206,9 @@ class DeletePublicKeyDetailTest(TestCase):
         self.assertEquals(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_all_fields(self):
-        public_key = PublicKeyFactory()
-        public_key.save()
+        key_pair = KeyPairFactory()
+        key_pair.save()
         resp = self.client.delete(
-            f"/api/keys/{public_key.id}/",
+            f"/api/keys/{key_pair.id}/",
         )
         self.assertEquals(resp.status_code, status.HTTP_204_NO_CONTENT)

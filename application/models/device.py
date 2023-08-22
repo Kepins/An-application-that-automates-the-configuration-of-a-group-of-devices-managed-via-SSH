@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from .public_key import PublicKey
+from .key_pair import KeyPair
 
 
 class Device(models.Model):
@@ -21,8 +21,8 @@ class Device(models.Model):
         default=22,
     )
 
-    """Key used for ssh authorization"""
-    public_key = models.ForeignKey(PublicKey, null=True, on_delete=models.SET_NULL)
+    """Keys used for ssh authorization"""
+    key_pair = models.ForeignKey(KeyPair, null=True, on_delete=models.SET_NULL)
 
     """Password"""
     password = models.CharField(255, null=True)
