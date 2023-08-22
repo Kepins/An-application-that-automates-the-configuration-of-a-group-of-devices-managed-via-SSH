@@ -14,13 +14,9 @@ class KeyPair(models.Model):
 
     # type = models.CharField(choices=TypeOfKey.choices)
 
-    private_key_content = models.TextField(
-        unique=True,
-    )
+    private_key_content = models.TextField(db_index=False)
 
     """ssh-key file content (That COULD be stripped of the comment at the end)"""
-    public_key_content = models.TextField(
-        unique=True,
-    )  # 1024 is an arbitrary number
+    public_key_content = models.TextField(db_index=False)  # 1024 is an arbitrary number
 
     # comment = models.CharField()
