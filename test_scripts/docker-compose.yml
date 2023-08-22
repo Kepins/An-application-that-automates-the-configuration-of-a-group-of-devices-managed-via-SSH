@@ -1,0 +1,8 @@
+version: '3'
+services:
+  debian1:
+    build:
+      context: .
+      dockerfile: dockerfiles/first/Dockerfile
+    ports:
+      - "2222:22"
