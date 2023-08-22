@@ -10,6 +10,9 @@ class Device(models.Model):
     """Human readable name"""
     name = models.CharField(40)
 
+    """Account name on device"""
+    username = models.CharField(255)
+
     """Hostname or IPv4 or IPv6"""
     hostname = models.CharField(
         255

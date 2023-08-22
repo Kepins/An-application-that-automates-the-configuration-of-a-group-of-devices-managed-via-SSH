@@ -13,6 +13,7 @@ from application.tests.factories import (
 def assert_device_matches_json(test_case, device, device_json):
     test_case.assertEquals(device_json["id"], device.id)
     test_case.assertEquals(device_json["name"], device.name)
+    test_case.assertEquals(device_json["username"], device.username)
     test_case.assertEquals(device_json["hostname"], device.hostname)
     if device.key_pair:
         test_case.assertEquals(device_json["key_pair"], device.key_pair.id)
@@ -76,6 +77,7 @@ class PostDeviceListTest(TestCase):
                 {
                     "name": device.name,
                     "hostname": device.hostname,
+                    "username": device.username,
                     "key_pair": None,
                     "port": device.port,
                     "password": device.password,
@@ -116,6 +118,7 @@ class PostDeviceListTest(TestCase):
                 {
                     "name": device.name,
                     "hostname": device.hostname,
+                    "username": device.username,
                     "key_pair": key_pair.id,
                     "port": device.port,
                     "password": device.password,
@@ -182,6 +185,7 @@ class PutDeviceDetailTest(TestCase):
                 {
                     "name": new_device.name,
                     "hostname": new_device.hostname,
+                    "username": device.username,
                     "key_pair": new_device.key_pair.id,
                     "port": new_device.port,
                     "password": new_device.password,
@@ -204,6 +208,7 @@ class PutDeviceDetailTest(TestCase):
                 {
                     "name": new_device.name,
                     "hostname": new_device.hostname,
+                    "username": device.username,
                     "key_pair": None,
                     "port": new_device.port,
                     "password": new_device.password,
