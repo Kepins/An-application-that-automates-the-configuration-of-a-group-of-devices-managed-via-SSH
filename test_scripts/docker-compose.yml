@@ -6,3 +6,21 @@ services:
       dockerfile: dockerfiles/first/Dockerfile
     ports:
       - "2222:22"
+  debian2:
+    build:
+      context: .
+      dockerfile: dockerfiles/first/Dockerfile
+    ports:
+      - "2223:22"
+  debian3:
+    build:
+      context: .
+      dockerfile: dockerfiles/second/Dockerfile
+    ports:
+      - "2224:22"
+  debian4:
+    build:
+      context: .
+      dockerfile: dockerfiles/second/Dockerfile
+    ports:
+      - "2225:22"
