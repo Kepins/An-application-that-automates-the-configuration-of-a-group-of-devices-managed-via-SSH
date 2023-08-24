@@ -20,7 +20,6 @@ env = Env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-Env.read_env(os.path.join(BASE_DIR, ".env"))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -32,7 +31,9 @@ FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", default="SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG", True)
 
 
-# Application definition
+# ==============================================================================
+# INSTALLED APPS
+# ==============================================================================
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -42,8 +43,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "celery",
     "application.apps.ApplicationConfig",
 ]
+
+# ==============================================================================
+# MIDDLEWARE SETTINGS
+# ==============================================================================
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -57,6 +63,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 
+
+# ==============================================================================
+# TEMPLATES SETTINGS
+# ==============================================================================
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -76,9 +86,10 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 ALLOWED_HOSTS = ["*"]
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# ==============================================================================
+# DATABASES SETTINGS
+# ==============================================================================
 DATABASES = {
     "default": {
         "ENGINE": env("DB_ENGINE", default="django.db.backends.postgresql"),
@@ -89,8 +100,18 @@ DATABASES = {
     }
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
+# ==============================================================================
+# CELERY SETTINGS
+# ==============================================================================
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://redis:6379")
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="pyamqp://rabbitmq:5672")
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]
+
+# ==============================================================================
+# AUTHENTICATION AND AUTHORIZATION SETTINGS
+# ==============================================================================
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -107,6 +128,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# ==============================================================================
+# REST SETTINGS
+# ==============================================================================
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.SessionAuthentication",
@@ -115,6 +139,9 @@ REST_FRAMEWORK = {
     ),
 }
 
+# ==============================================================================
+# SIMPLE JWT SETTINGS
+# ==============================================================================
 JWT_AUTH = {
     "JWT_SECRET_KEY": SECRET_KEY,
     "JWT_ALGORITHM": "HS256",

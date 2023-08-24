@@ -6,8 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE config.settings.local
 
-COPY ./docker/django/local/start.sh /start.sh
-RUN chmod +x /start.sh
+# Copy startup scripts
+COPY ./docker/django/local/scripts /scripts
+# Make startup scripts runnable
+RUN find /scripts -type f -exec chmod +x {} \;
 
 
 # Set work directory
@@ -20,7 +22,3 @@ RUN pip install -r requirements/local.txt
 
 # Copy project
 COPY . .
-
-EXPOSE 8000
-
-ENTRYPOINT ["/start.sh"]

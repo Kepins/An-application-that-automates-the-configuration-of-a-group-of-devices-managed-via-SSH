@@ -12,7 +12,7 @@ services:
     depends_on:
       database:
         condition: service_healthy
-    command: /start.sh
+    command: /application.sh
   database:
     image: postgres:15
     volumes:

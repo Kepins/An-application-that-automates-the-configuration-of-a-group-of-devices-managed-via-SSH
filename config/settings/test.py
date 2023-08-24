@@ -10,3 +10,5 @@ class DisableMigrations:
 
 
 MIGRATION_MODULES = DisableMigrations()
+
+CELERY_TASK_ALWAYS_EAGER = True

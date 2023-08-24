@@ -18,6 +18,7 @@ services:
       - CELERY_BROKER_URL=pyamqp://rabbitmq:5672
     env_file:
       - .env.local
+    command: ["/scripts/application.sh"]
     depends_on:
       database:
         condition: service_healthy
@@ -38,6 +39,16 @@ services:
       interval: 2s
       timeout: 5s
       retries: 5
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: docker/django/local/Dockerfile
+    volumes:
+      - .:/diploma/app
+    env_file:
+      - .env.local
+    command: ["/scripts/celery.sh"]
 
   rabbitmq:
     image: rabbitmq:3.12

@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE config.settings.production
 
 COPY ./docker/django/production/start.sh /start.sh
-RUN chmod +x /start.sh
+RUN chmod +x /application.sh
 
 # Create non-root user
 RUN useradd -ms /bin/bash django
