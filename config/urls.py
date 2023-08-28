@@ -9,14 +9,14 @@ from rest_framework_simplejwt.views import (
 )
 
 from application.api.views.device import DeviceViewSet
-from application.api.views.public_key import PublicKeyViewSet
+from application.api.views.key_pair import KeyPairViewSet
 from application.api.views.group import GroupKeyViewSet
 from application.api.views.custom_user import RegisterView
 from application.api.views.script import ScriptViewSet
 
 router = DefaultRouter()
 router.register(r"devices", DeviceViewSet, basename="devices")
-router.register(r"keys", PublicKeyViewSet, basename="keys")
+router.register(r"keys", KeyPairViewSet, basename="keys")
 router.register(r"groups", GroupKeyViewSet, basename="groups")
 router.register(r"scripts", ScriptViewSet, basename="scripts")
 

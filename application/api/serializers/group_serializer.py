@@ -10,7 +10,7 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = "__all__"
         extra_kwargs = {
-            "public_key": {"required": True},
+            "key_pair": {"required": True},
             "devices": {"required": True},
         }
 
@@ -29,7 +29,7 @@ class GroupAddDevicesSerializer(serializers.ModelSerializer):
         fields = "__all__"
         extra_kwargs = {
             "devices": {"required": True},
-            "public_key": {"read_only": True},
+            "key_pair": {"read_only": True},
         }
 
 
@@ -48,5 +48,5 @@ class GroupRemoveDevicesSerializer(serializers.ModelSerializer):
         fields = "__all__"
         extra_kwargs = {
             "devices": {"required": True},
-            "public_key": {"read_only": True},
+            "key_pair": {"read_only": True},
         }

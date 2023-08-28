@@ -1,8 +1,8 @@
 from django.db import models
 
 
-class PublicKey(models.Model):
-    """Public ssh-key that has content of ssh-keygen generated file"""
+class KeyPair(models.Model):
+    """ssh-key pair that has content of ssh-keygen generated files"""
 
     # class TypeOfKey(models.TextChoices):
     #     DSA = "dsa"
@@ -14,10 +14,9 @@ class PublicKey(models.Model):
 
     # type = models.CharField(choices=TypeOfKey.choices)
 
+    private_key_content = models.TextField(db_index=False)
+
     """ssh-key file content (That COULD be stripped of the comment at the end)"""
-    key_content = models.TextField(
-        max_length=1024,
-        unique=True,
-    )  # 1024 is an arbitrary number
+    public_key_content = models.TextField(db_index=False)  # 1024 is an arbitrary number
 
     # comment = models.CharField()

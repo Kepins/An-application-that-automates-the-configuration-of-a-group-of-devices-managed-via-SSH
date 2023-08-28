@@ -11,6 +11,6 @@ class DeviceSerializer(serializers.ModelSerializer):
         fields = "__all__"
         extra_kwargs = {
             "port": {"required": True},
-            "public_key": {"required": True},
+            "key_pair": {"required": True},
             "password": {"required": True},
         }
