@@ -22,8 +22,8 @@ router.register(r"scripts", ScriptViewSet, basename="scripts")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api-token-auth/", TokenObtainPairView.as_view()),
-    path("api-token-refresh/", TokenRefreshView.as_view()),
+    path("auth/login/", TokenObtainPairView.as_view(), name="login"),
+    path("auth/refresh/", TokenRefreshView.as_view(), name="refresh"),
     path("api/", include((router.urls, "api"), namespace="api")),
     path("auth/register/", RegisterView.as_view(), name="register"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

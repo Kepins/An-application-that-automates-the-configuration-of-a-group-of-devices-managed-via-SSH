@@ -51,7 +51,7 @@ class TestLoginUser(APITestCase):
         cls.password = "test_pass"
         cls.test_user = UserFactory(password=cls.password)
         cls.client = APIClient()
-        cls.url = "/api-token-auth/"
+        cls.url = reverse("login")
 
     def test_login_user_200(self):
         data = {"username": self.test_user.username, "password": self.password}
