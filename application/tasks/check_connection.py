@@ -1,3 +1,5 @@
+from io import StringIO, BytesIO
+
 import paramiko
 
 from celery import shared_task
@@ -10,17 +12,18 @@ class SshConnectionException(Exception):
         self.error = error
 
 
-def test_auth_key(transport, username, key_pair):
-    try:
-        # try to create instance of key from key content
-        # TODO change key_type to be dynamic
-        pk = paramiko.pkey.PKey.from_type_string(
-            "ssh-ed25519", key_pair.private_key_content
-        )
-    except paramiko.ssh_exception.SSHException:
-        # key instance cannot be created
-        raise SshConnectionException("Wrong key format")
+def load_key(pkey_content):
+    classes = [paramiko.RSAKey, paramiko.Ed25519Key, paramiko.DSSKey, paramiko.ECDSAKey]
+    for c in classes:
+        try:
+            return c(file_obj=StringIO(pkey_content))
+        except (paramiko.ssh_exception.SSHException, IOError) as e:
+            pass
+    raise SshConnectionException("Wrong key format")
 
+
+def test_auth_key(transport, username, key_pair):
+    pk = load_key(key_pair.private_key_content)
     try:
         # try to authenticate
         transport.auth_publickey(username, pk)
@@ -87,4 +90,5 @@ def check_connection(group_id, device_id):
         print("Auth")
         print(warns)
     else:
+        print(warns)
         print("Couldn't auth")

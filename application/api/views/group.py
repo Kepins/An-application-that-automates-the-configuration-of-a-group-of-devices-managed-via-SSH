@@ -9,9 +9,10 @@ from application.api.serializers.group_serializer import (
     GroupRemoveDevicesSerializer,
 )
 from application.models.group import Group
+from application.tasks import check_connection
 
 
-class GroupKeyViewSet(viewsets.ModelViewSet):
+class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     serializer_add_devices = GroupAddDevicesSerializer
@@ -39,3 +40,12 @@ class GroupKeyViewSet(viewsets.ModelViewSet):
 
         serializer.save()
         return Response(serializer.data, status.HTTP_200_OK)
+
+    @action(detail=True, methods=["POST"])
+    def check_connection(self, request, pk):
+
+        group = self.get_object()
+        for d in group.devices.all():
+            check_connection.delay(group.id, d.id)
+
+        return Response(None, status.HTTP_202_ACCEPTED)

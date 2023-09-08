@@ -10,7 +10,7 @@ from rest_framework_simplejwt.views import (
 
 from application.api.views.device import DeviceViewSet
 from application.api.views.key_pair import KeyPairViewSet
-from application.api.views.group import GroupKeyViewSet
+from application.api.views.group import GroupViewSet
 from application.api.views.custom_user import RegisterView
 from application.api.views.run_script import RunScriptAPIView
 from application.api.views.script import ScriptViewSet
@@ -18,7 +18,7 @@ from application.api.views.script import ScriptViewSet
 router = DefaultRouter()
 router.register(r"devices", DeviceViewSet, basename="devices")
 router.register(r"keys", KeyPairViewSet, basename="keys")
-router.register(r"groups", GroupKeyViewSet, basename="groups")
+router.register(r"groups", GroupViewSet, basename="groups")
 router.register(r"scripts", ScriptViewSet, basename="scripts")
 
 urlpatterns = [
