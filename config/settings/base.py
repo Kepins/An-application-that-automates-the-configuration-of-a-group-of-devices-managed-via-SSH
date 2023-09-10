@@ -84,7 +84,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -119,7 +119,7 @@ CHANNEL_LAYERS = {
         "CONFIG": {
             "hosts": [
                 (
-                    env("CHANNELLAYER_HOST", default="localhost"),
+                    env("CHANNELLAYER_HOST", default="redis"),
                     env.int("CHANNELLAYER_PORT", 6379),
                 )
             ],
