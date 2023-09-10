@@ -1,8 +1,11 @@
-from io import StringIO, BytesIO
+import json
+from io import StringIO
 
 import paramiko
 
 from celery import shared_task
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 from application.models import Device, Group
 
@@ -53,13 +56,26 @@ def test_auth_pass(transport, username, password):
 
 @shared_task(ignore_result=True)
 def check_connection(group_id, device_id):
+    channel_layer = get_channel_layer()
     device = Device.objects.get(pk=device_id)
     group = Group.objects.get(pk=group_id)
     try:
         transport = paramiko.Transport((device.hostname, device.port))
         transport.connect()
     except paramiko.ssh_exception.SSHException:
-        print("Host not available")
+        async_to_sync(channel_layer.group_send)(
+            f"group",
+            {
+                "type": "send.checkconn.update",  # This is the custom consumer type you define
+                "message": json.dumps(
+                    {
+                        "id_device": device.id,
+                        "status": "Host not available",
+                        "warnings": [],
+                    }
+                ),
+            },
+        )
         return
 
     warns = []
@@ -87,8 +103,34 @@ def check_connection(group_id, device_id):
     transport.close()
 
     if authenticated:
+        async_to_sync(channel_layer.group_send)(
+            f"group",
+            {
+                "type": "send.checkconn.update",  # This is the custom consumer type you define
+                "message": json.dumps(
+                    {
+                        "id_device": device.id,
+                        "status": "Ok",
+                        "warnings": warns,
+                    }
+                ),
+            },
+        )
         print("Auth")
         print(warns)
     else:
+        async_to_sync(channel_layer.group_send)(
+            f"group",
+            {
+                "type": "send.checkconn.update",  # This is the custom consumer type you define
+                "message": json.dumps(
+                    {
+                        "id_device": device.id,
+                        "status": "Bad authentication methods",
+                        "warnings": warns,
+                    }
+                ),
+            },
+        )
         print(warns)
         print("Couldn't auth")
