@@ -7,10 +7,14 @@ from application.exceptions import SshConnectionException
 from application.models import Device, Group
 
 
-class Status(Enum):
+class ConnectionStatus(Enum):
     OK = "Ok"
     BadAuthMethods = "Bad authentication methods"
     HostNotAvailable = "(Network)Host not available"
+
+
+class RunScriptStatus(ConnectionStatus):
+   pass
 
 
 def load_key(pkey_content):

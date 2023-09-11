@@ -21,7 +21,7 @@ def check_connection(group_id, device_id, request_uuid=None):
 
     channel_layer = get_channel_layer()
 
-    status, warns, password, key = check_connection()
+    status, warns, password, key = check_connection(device_id, group_id)
     response.initial_data["status"] = status.value
     if status == status.HostNotAvailable:
         response.is_valid(raise_exception=True)
