@@ -14,6 +14,7 @@ from application.api.views.group import GroupViewSet
 from application.api.views.custom_user import RegisterView
 from application.api.views.run_script import RunScriptAPIView
 from application.api.views.script import ScriptViewSet
+from application.consumers import Consumer
 
 router = DefaultRouter()
 router.register(r"devices", DeviceViewSet, basename="devices")
@@ -29,3 +30,7 @@ urlpatterns = [
     path("api/run_script/", RunScriptAPIView.as_view(), name="run_script"),
     path("auth/register/", RegisterView.as_view(), name="register"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+websocket_urlpatterns = [
+    path("ws/", Consumer.as_asgi()),
+]

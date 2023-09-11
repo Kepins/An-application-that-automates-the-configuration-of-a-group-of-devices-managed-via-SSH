@@ -36,6 +36,7 @@ DEBUG = env.bool("DJANGO_DEBUG", True)
 # ==============================================================================
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -83,7 +84,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -108,6 +109,24 @@ CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="pyamqp://rabbitmq:5672")
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
+
+# ==============================================================================
+# CHANNEL SETTINGS
+# ==============================================================================
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                (
+                    env("CHANNELLAYER_HOST", default="redis"),
+                    env.int("CHANNELLAYER_PORT", 6379),
+                )
+            ],
+        },
+        # "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 # ==============================================================================
 # AUTHENTICATION AND AUTHORIZATION SETTINGS
