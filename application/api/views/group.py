@@ -1,3 +1,5 @@
+import uuid
+
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.decorators import action
@@ -44,8 +46,10 @@ class GroupViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["POST"])
     def check_connection(self, request, pk):
 
+        request_uuid = uuid.uuid4()
+
         group = self.get_object()
         for d in group.devices.all():
-            check_connection.delay(group.id, d.id)
+            check_connection.delay(group.id, d.id, request_uuid=request_uuid)
 
-        return Response(None, status.HTTP_202_ACCEPTED)
+        return Response({"request_uuid": request_uuid}, status.HTTP_202_ACCEPTED)

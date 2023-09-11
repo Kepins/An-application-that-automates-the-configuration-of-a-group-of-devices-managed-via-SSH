@@ -1,9 +1,13 @@
-from io import StringIO, BytesIO
+import json
+from io import StringIO
 
 import paramiko
 
 from celery import shared_task
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
+from application.api.serializers.conn_status_serializer import ConnStatusSerializer
 from application.models import Device, Group
 
 
@@ -52,14 +56,33 @@ def test_auth_pass(transport, username, password):
 
 
 @shared_task(ignore_result=True)
-def check_connection(group_id, device_id):
+def check_connection(group_id, device_id, request_uuid=None):
+    response = ConnStatusSerializer(
+        partial=True,
+        data={
+            "request_uuid": request_uuid,
+            "device": device_id,
+            "warnings": [],
+        },
+    )
+
+    channel_layer = get_channel_layer()
     device = Device.objects.get(pk=device_id)
     group = Group.objects.get(pk=group_id)
     try:
         transport = paramiko.Transport((device.hostname, device.port))
         transport.connect()
     except paramiko.ssh_exception.SSHException:
-        print("Host not available")
+        response.initial_data["status"] = "(Network)Host not available"
+
+        response.is_valid(raise_exception=True)
+        async_to_sync(channel_layer.group_send)(
+            f"group",
+            {
+                "type": "send.checkconn.update",  # This is the custom consumer type you define
+                "message": response.data,
+            },
+        )
         return
 
     warns = []
@@ -70,25 +93,37 @@ def check_connection(group_id, device_id):
         try:
             authenticated = test_auth_key(transport, device.username, device.key_pair)
         except SshConnectionException as e:
-            warns.append(e.error)
+            warns.append(f"(Device Key){e.error}")
 
     if not authenticated and group.key_pair:
         try:
             authenticated = test_auth_key(transport, device.username, group.key_pair)
         except SshConnectionException as e:
-            warns.append(e.error)
+            warns.append(f"(Group Key){e.error}")
 
     if not authenticated and device.password:
         try:
             authenticated = test_auth_pass(transport, device.username, device.password)
         except SshConnectionException as e:
-            warns.append(e.error)
+            warns.append(f"(Device Password){e.error}")
+
+    if not any([device.key_pair, group.key_pair, device.password]):
+        warns.append("No authentication method")
 
     transport.close()
 
     if authenticated:
-        print("Auth")
-        print(warns)
+        response.initial_data["status"] = "Ok"
     else:
-        print(warns)
-        print("Couldn't auth")
+        response.initial_data["status"] = "Bad authentication methods"
+
+    response.initial_data["warnings"] = warns
+
+    response.is_valid(raise_exception=True)
+    async_to_sync(channel_layer.group_send)(
+        f"group",
+        {
+            "type": "send.checkconn.update",  # This is the custom consumer type you define
+            "message": response.data,
+        },
+    )
