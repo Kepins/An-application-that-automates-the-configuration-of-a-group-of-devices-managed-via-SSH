@@ -45,7 +45,6 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["POST"])
     def check_connection(self, request, pk):
-
         request_uuid = uuid.uuid4()
 
         group = self.get_object()
