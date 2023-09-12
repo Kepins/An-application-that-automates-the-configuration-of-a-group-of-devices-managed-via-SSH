@@ -61,10 +61,10 @@ def run_script_on_device(group_pk, device_pk, script_pk, request_uuid):
         response.initial_data["status"] = RunScriptStatus.OK.value
     except AuthenticationException as e:
         warns.append("Auth error during creating connection")
-        response.initial_data["status"] = RunScriptStatus.HostNotAvailable
+        response.initial_data["status"] = RunScriptStatus.HostNotAvailable.value
     except UnexpectedExit as e:
         warns.append(e.args[0].stderr)
-        response.initial_data["status"] = RunScriptStatus.ErrorWhileRunningScript
+        response.initial_data["status"] = RunScriptStatus.ErrorWhileRunningScript.value
     response.initial_data["warnings"] = warns
     response.is_valid(raise_exception=True)
     async_to_sync(channel_layer.group_send)(
