@@ -18,3 +18,7 @@ class Consumer(AsyncWebsocketConsumer):
     async def send_checkconn_update(self, event):
         # Send a custom message to the client
         await self.send(text_data=json.dumps(event))
+
+    async def send_runscript_update(self, event):
+        # Send a custom message to the client
+        await self.send(text_data=json.dumps(event))

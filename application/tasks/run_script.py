@@ -11,6 +11,7 @@ from application.models import Script, Device
 from application.utils.task_utils import (
     check_connection,
     RunScriptStatus,
+    ConnectionStatus,
 )
 
 
@@ -27,14 +28,14 @@ def run_script_on_device(group_pk, device_pk, script_pk, request_uuid):
     channel_layer = get_channel_layer()
 
     status, warns, password, key = check_connection(device_pk, group_pk)
-    if status != RunScriptStatus.OK:
+    if status != ConnectionStatus.OK:
         response.initial_data["status"] = status.value
         response.initial_data["warnings"] = warns
         response.is_valid(raise_exception=True)
         async_to_sync(channel_layer.group_send)(
             f"group",
             {
-                "type": "send.checkconn.update",  # This is the custom consumer type you define
+                "type": "send.runscript.update",  # This is the custom consumer type you define
                 "message": response.data,
             },
         )
@@ -60,16 +61,16 @@ def run_script_on_device(group_pk, device_pk, script_pk, request_uuid):
         response.initial_data["status"] = RunScriptStatus.OK.value
     except AuthenticationException as e:
         warns.append("Auth error during creating connection")
-        response.initial_data["status"] = RunScriptStatus.OK.value
+        response.initial_data["status"] = RunScriptStatus.HostNotAvailable
     except UnexpectedExit as e:
         warns.append(e.args[0].stderr)
-        response.initial_data["status"] = RunScriptStatus.OK.value
+        response.initial_data["status"] = RunScriptStatus.ErrorWhileRunningScript
     response.initial_data["warnings"] = warns
     response.is_valid(raise_exception=True)
     async_to_sync(channel_layer.group_send)(
         f"group",
         {
-            "type": "send.checkconn.update",
+            "type": "send.runscript.update",
             "message": response.data,
         },
     )

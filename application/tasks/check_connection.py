@@ -9,7 +9,7 @@ from application.utils.task_utils import check_connection
 
 
 @shared_task(ignore_result=True)
-def check_connection(group_id, device_id, request_uuid=None):
+def check_connection_task(group_id, device_id, request_uuid=None):
     response = ConnStatusSerializer(
         partial=True,
         data={
@@ -31,10 +31,4 @@ def check_connection(group_id, device_id, request_uuid=None):
             "type": "send.checkconn.update",  # This is the custom consumer type you define
             "message": response.data,
         },
-    )
-    Connection(
-        host=device.hostname,
-        user=device.username,
-        port=device.port,
-        connect_kwargs={"pkey": private_key, "timeout": 10},
     )

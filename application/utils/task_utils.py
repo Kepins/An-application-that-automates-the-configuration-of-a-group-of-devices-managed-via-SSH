@@ -13,8 +13,11 @@ class ConnectionStatus(Enum):
     HostNotAvailable = "(Network)Host not available"
 
 
-class RunScriptStatus(ConnectionStatus):
+class RunScriptStatus(Enum):
     ErrorWhileRunningScript = "Error while running script"
+    OK = "Ok"
+    BadAuthMethods = "Bad authentication methods"
+    HostNotAvailable = "(Network)Host not available"
 
 
 def load_key(pkey_content):
@@ -66,7 +69,7 @@ def check_connection(device_id, group_id):
         transport = paramiko.Transport((device.hostname, device.port))
         transport.connect()
     except paramiko.ssh_exception.SSHException:
-        status = Status.HostNotAvailable
+        status = ConnectionStatus.HostNotAvailable
         return status, warns, password, key
 
     authenticated = False
@@ -101,7 +104,7 @@ def check_connection(device_id, group_id):
 
     transport.close()
     if authenticated:
-        status = Status.OK
+        status = ConnectionStatus.OK
     else:
-        status = Status.BadAuthMethods
+        status = ConnectionStatus.BadAuthMethods
     return status, warns, password, key
