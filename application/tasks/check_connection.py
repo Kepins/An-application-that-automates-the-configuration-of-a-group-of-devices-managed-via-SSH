@@ -23,19 +23,7 @@ def check_connection(group_id, device_id, request_uuid=None):
 
     status, warns, password, key = check_connection(device_id, group_id)
     response.initial_data["status"] = status.value
-    if status == status.HostNotAvailable:
-        response.is_valid(raise_exception=True)
-        async_to_sync(channel_layer.group_send)(
-            f"group",
-            {
-                "type": "send.checkconn.update",  # This is the custom consumer type you define
-                "message": response.data,
-            },
-        )
-        return
-
     response.initial_data["warnings"] = warns
-
     response.is_valid(raise_exception=True)
     async_to_sync(channel_layer.group_send)(
         f"group",
@@ -43,4 +31,10 @@ def check_connection(group_id, device_id, request_uuid=None):
             "type": "send.checkconn.update",  # This is the custom consumer type you define
             "message": response.data,
         },
+    )
+    Connection(
+        host=device.hostname,
+        user=device.username,
+        port=device.port,
+        connect_kwargs={"pkey": private_key, "timeout": 10},
     )

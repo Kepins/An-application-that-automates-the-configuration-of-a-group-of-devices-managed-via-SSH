@@ -14,7 +14,7 @@ class ConnectionStatus(Enum):
 
 
 class RunScriptStatus(ConnectionStatus):
-   pass
+    ErrorWhileRunningScript = "Error while running script"
 
 
 def load_key(pkey_content):

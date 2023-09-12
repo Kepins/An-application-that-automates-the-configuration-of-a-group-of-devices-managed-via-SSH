@@ -1,3 +1,5 @@
+import uuid
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -7,6 +9,7 @@ from application.tasks.run_script import run_script_on_device
 
 class RunScriptAPIView(APIView):
     def post(self, request, format=None):
+        request_uuid = uuid.uuid4()
         serializer = RunSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -16,6 +19,7 @@ class RunScriptAPIView(APIView):
                 group_pk=group.id,
                 device_pk=device.id,
                 script_pk=serializer.validated_data["script"].id,
+                request_uuid=request_uuid,
             )
 
         return Response(serializer.data)
