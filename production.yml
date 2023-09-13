@@ -1,32 +1,44 @@
 version: "3.9"
 
+name: ssh-configurator
 services:
   django:
-    build:
-      context: .
-      dockerfile: docker/django/production/Dockerfile
-    volumes:
-      - .:/home/django/code
+    image: kepins/ssh-configurator-api
     ports:
-      - 8000:8000
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - .env
+    command: ["/scripts/application.sh"]
     depends_on:
       database:
         condition: service_healthy
-    command: /application.sh
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_started
   database:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    environment:
-      POSTGRES_DB: ssh_application
-      POSTGRES_USER: diploma_user
-      POSTGRES_PASSWORD: password
+    env_file:
+      - .env
     healthcheck:
-      test: [ 'CMD-SHELL', 'pg_isready -d ssh_application -U diploma_user' ]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 2s
       timeout: 5s
       retries: 5
 
+  celery_worker:
+    image: kepins/ssh-configurator-api
+    env_file:
+      - .env
+    command: ["/scripts/celery.sh"]
+
+  rabbitmq:
+    image: rabbitmq:3.12
+
+  redis:
+    image: redis:7.2
+
 volumes:
   postgres_data:
-

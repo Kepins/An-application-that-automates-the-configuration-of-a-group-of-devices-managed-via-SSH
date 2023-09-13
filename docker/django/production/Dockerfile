@@ -6,15 +6,17 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE config.settings.production
 
-COPY ./docker/django/production/start.sh /start.sh
-RUN chmod +x /application.sh
+# Copy startup scripts
+COPY ./docker/django/production/scripts /scripts
+# Make startup scripts runnable
+RUN find /scripts -type f -exec chmod +x {} \;
 
 # Create non-root user
-RUN useradd -ms /bin/bash django
-USER django
+#RUN useradd -ms /bin/bash django
+#USER django
 
 # Set work directory
-WORKDIR /home/django/code
+WORKDIR /diploma/app
 
 # Install dependencies
 COPY requirements requirements
@@ -22,9 +24,3 @@ RUN pip install -r requirements/production.txt
 
 # Copy project
 COPY . .
-
-
-
-
-
-

@@ -22,12 +22,15 @@ router.register(r"groups", GroupViewSet, basename="groups")
 router.register(r"scripts", ScriptViewSet, basename="scripts")
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
     path("auth/login/", TokenObtainPairView.as_view(), name="login"),
     path("auth/refresh/", TokenRefreshView.as_view(), name="refresh"),
     path("api/", include((router.urls, "api"), namespace="api")),
     path("auth/register/", RegisterView.as_view(), name="register"),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]
+
+if settings.DEBUG:
+    urlpatterns += (path("admin/", admin.site.urls),)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 websocket_urlpatterns = [
     path("ws/", Consumer.as_asgi()),

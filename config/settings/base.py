@@ -162,7 +162,7 @@ REST_FRAMEWORK = {
 # SIMPLE JWT SETTINGS
 # ==============================================================================
 JWT_AUTH = {
-    "JWT_SECRET_KEY": SECRET_KEY,
+    "JWT_SECRET_KEY": env("DJANGO_SECRET_KEY", default="SECRET_KEY"),
     "JWT_ALGORITHM": "HS256",
     "JWT_ALLOW_REFRESH": True,
     "JWT_EXPIRATION_DELTA": datetime.timedelta(seconds=3600),  # Token expiration 1 hour

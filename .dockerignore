@@ -1,6 +1,11 @@
+# envs
 .env
-.env.example
-.env.local
-.env.test
+# git
+.git
 .gitignore
-
+# venv
+venv
+# statics
+static
+#cache
+__pycache__
