@@ -19,7 +19,6 @@ class PostRunScriptTest(APITestCase):
 
     @mock.patch("application.api.views.run_script.run_script_on_device")
     def test_group_with_devices(self, task_mock):
-
         url = reverse("run_script")
         data = {
             "group": self.test_group1.id,
