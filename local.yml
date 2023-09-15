@@ -1,5 +1,6 @@
 version: "3.9"
 
+name: diploma-local
 services:
   django:
     build:
@@ -9,13 +10,6 @@ services:
       - .:/diploma/app
     ports:
       - "8000:8000"
-    environment:
-      - POSTGRES_DB=ssh_application
-      - POSTGRES_USER=diploma_user
-      - POSTGRES_PASSWORD=password
-      - DB_HOST=database
-      - CELERY_RESULT_BACKEND=redis://redis:6379
-      - CELERY_BROKER_URL=pyamqp://rabbitmq:5672
     env_file:
       - .env.local
     command: ["/scripts/application.sh"]
@@ -30,12 +24,10 @@ services:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_DB=ssh_application
-      - POSTGRES_USER=diploma_user
-      - POSTGRES_PASSWORD=password
+    env_file:
+      - .env.local
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -d ssh_application -U diploma_user']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 2s
       timeout: 5s
       retries: 5

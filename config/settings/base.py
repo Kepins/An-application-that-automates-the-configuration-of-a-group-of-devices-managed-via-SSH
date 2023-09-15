@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the  key used in production secret!
-SECRET_KEY = env("DJANGO_SECRET_KEY", default="SECRET_KEY")
-FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", default="SECRET_KEY")
+SECRET_KEY = env("DJANGO_SECRET_KEY")
+FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DJANGO_DEBUG", True)
@@ -86,26 +86,26 @@ TEMPLATES = [
 
 ASGI_APPLICATION = "config.asgi.application"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 # ==============================================================================
 # DATABASES SETTINGS
 # ==============================================================================
 DATABASES = {
     "default": {
-        "ENGINE": env("DB_ENGINE", default="django.db.backends.postgresql"),
-        "NAME": env("POSTGRES_DB", default="ssh_application"),
-        "USER": env("POSTGRES_USER", default="diploma_user"),
-        "PASSWORD": env("POSTGRES_PASSWORD", default="password"),
-        "HOST": env("DB_HOST", default="database"),
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("POSTGRES_DB"),
+        "USER": env("POSTGRES_USER"),
+        "PASSWORD": env("POSTGRES_PASSWORD"),
+        "HOST": env("DB_HOST"),
     }
 }
 
 # ==============================================================================
 # CELERY SETTINGS
 # ==============================================================================
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://redis:6379")
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="pyamqp://rabbitmq:5672")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND")
+CELERY_BROKER_URL = env("CELERY_BROKER_URL")
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
@@ -119,8 +119,8 @@ CHANNEL_LAYERS = {
         "CONFIG": {
             "hosts": [
                 (
-                    env("CHANNELLAYER_HOST", default="redis"),
-                    env.int("CHANNELLAYER_PORT", 6379),
+                    env("CHANNELLAYER_HOST"),
+                    env.int("CHANNELLAYER_PORT"),
                 )
             ],
         },
@@ -162,7 +162,7 @@ REST_FRAMEWORK = {
 # SIMPLE JWT SETTINGS
 # ==============================================================================
 JWT_AUTH = {
-    "JWT_SECRET_KEY": env("DJANGO_SECRET_KEY", default="SECRET_KEY"),
+    "JWT_SECRET_KEY": env("DJANGO_SECRET_KEY"),
     "JWT_ALGORITHM": "HS256",
     "JWT_ALLOW_REFRESH": True,
     "JWT_EXPIRATION_DELTA": datetime.timedelta(seconds=3600),  # Token expiration 1 hour
