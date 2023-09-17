@@ -2,6 +2,7 @@ from django.db import models
 
 from encrypted_model_fields import fields
 
+
 class KeyPair(models.Model):
     """ssh-key pair that has content of ssh-keygen generated files"""
 
@@ -18,6 +19,8 @@ class KeyPair(models.Model):
     private_key_content = models.TextField(db_index=False)
 
     """ssh-key file content (That COULD be stripped of the comment at the end)"""
-    public_key_content = fields.EncryptedTextField(db_index=False)  # 1024 is an arbitrary number
+    public_key_content = fields.EncryptedTextField(
+        db_index=False
+    )  # 1024 is an arbitrary number
 
     # comment = models.CharField()

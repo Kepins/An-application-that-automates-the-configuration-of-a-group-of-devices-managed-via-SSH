@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'encrypted_model_fields',
+    "encrypted_model_fields",
     "rest_framework",
     "celery",
     "application.apps.ApplicationConfig",
