@@ -5,7 +5,11 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from application.api.serializers import RunSerializer, ConnStatusSerializer
+from application.api.serializers import (
+    RunSerializer,
+    ConnStatusSerializer,
+    RunScriptStatusSerializer,
+)
 from application.api.serializers.group_serializer import (
     GroupSerializer,
     GroupAddDevicesSerializer,
@@ -13,7 +17,7 @@ from application.api.serializers.group_serializer import (
 )
 from application.models.group import Group
 from application.tasks import check_connection_task, run_script_on_device
-from application.utils.task_utils import check_connection
+from application.utils.task_utils import check_connection, run_script
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -23,6 +27,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_remove_devices = GroupRemoveDevicesSerializer
     serializer_run_script = RunSerializer
     serializer_conn_Status = ConnStatusSerializer
+    serializer_run_Script_Status = RunScriptStatusSerializer
 
     def get_serializer_class(self):
         if self.action == "add_devices":
@@ -61,12 +66,10 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["POST"])
     def sync_check_connection(self, request, pk):
-        request_uuid = uuid.uuid4()
-
         group = self.get_object()
         data = []
         for d in group.devices.all():
-            status, warns, password, key = check_connection_task(d.id, group.id)
+            status, warns, password, key = check_connection(d.id, group.id)
             connection_data = {
                 "device": d.id,
                 "status": status.value,
@@ -96,17 +99,20 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["POST"])
     def sync_run_script(self, request, pk):
-        request_uuid = uuid.uuid4()
         group = self.get_object()
         serializer = RunSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        data = []
         for d in group.devices.all():
-            run_script_on_device.delay(
-                group.id,
-                d.id,
-                serializer.validated_data["script"].pk,
-                request_uuid=request_uuid,
+            status, warns = run_script(
+                d.id, group.id, serializer.validated_data["script"].pk
             )
-
-        return Response({"request_uuid": request_uuid}, status.HTTP_202_ACCEPTED)
+            run_script_data = {
+                "device": d.id,
+                "status": status.value,
+                "warnings": warns,
+            }
+            data.append(run_script_data)
+        serializer = self.get_serializer(data=data, many=True)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status.HTTP_200_OK)
