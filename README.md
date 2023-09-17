@@ -3,19 +3,25 @@
 ## Prerequisites
 - Docker
 
-## Installation
-1. Clone the project into your workspace
+## Running production
+1. Download `production.yml` file.
+2. Create `.env` file based on `.env.example`. There are two sections the _REQUIRED_
+and _OPTIONAL - FOR ADVANCED CONFIGURATION_. As the name suggest you need to set only
+the required part as the optionals are defaults in app settings. Please do it **thoughtfully** 
+as your app security depends on it.
+3. Run docker compose up command
 ```
-git clone git@github.com:Kepins/An-application-that-automates-the-configuration-of-a-group-of-devices-managed-via-SSH.git
+docker compose -f=production.yml up --detach
 ```
 
-2. Create .env file based on .env.example and set your variables
+## Exporting/importing application state
 
-3. Create superuser
+### Export
 ```
-docker compose -f=local.yml run django python manage.py createsuperuser
+docker run --rm -v ssh-configurator_postgres_data:/data -v .:/export ubuntu tar czf /export/dump_$(date +"%Y-%m-%d_%H_%M_%S").tar.gz -C /data .
 ```
-4. Run docker compose
+
+### Import
 ```
-docker compose -f=local.yml up
+docker run --rm -v ssh-configurator_postgres_data:/data -v .:/import ubuntu tar xzf /import/{DUMP_NAME} -C /data
 ```
