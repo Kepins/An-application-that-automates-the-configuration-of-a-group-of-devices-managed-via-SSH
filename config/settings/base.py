@@ -28,7 +28,7 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool("DJANGO_DEBUG", True)
+DEBUG = env.bool("DJANGO_DEBUG", False)
 
 
 # ==============================================================================
@@ -97,15 +97,15 @@ DATABASES = {
         "NAME": env("POSTGRES_DB"),
         "USER": env("POSTGRES_USER"),
         "PASSWORD": env("POSTGRES_PASSWORD"),
-        "HOST": env("DB_HOST"),
+        "HOST": env("DB_HOST", default="database"),
     }
 }
 
 # ==============================================================================
 # CELERY SETTINGS
 # ==============================================================================
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND")
-CELERY_BROKER_URL = env("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://redis:6379")
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="pyamqp://rabbitmq:5672")
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
@@ -119,8 +119,8 @@ CHANNEL_LAYERS = {
         "CONFIG": {
             "hosts": [
                 (
-                    env("CHANNELLAYER_HOST"),
-                    env.int("CHANNELLAYER_PORT"),
+                    env("CHANNELLAYER_HOST", default="redis"),
+                    env.int("CHANNELLAYER_PORT", default=6379),
                 )
             ],
         },
