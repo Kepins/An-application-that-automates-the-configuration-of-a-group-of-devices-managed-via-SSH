@@ -8,7 +8,7 @@ services:
       - "127.0.0.1:8000:8000"
     env_file:
       - .env
-    command: ["/scripts/application.sh"]
+    command: ["docker/django/production/scripts/application.sh"]
     depends_on:
       database:
         condition: service_healthy
@@ -32,7 +32,7 @@ services:
     image: kepins/ssh-configurator-api
     env_file:
       - .env
-    command: ["/scripts/celery.sh"]
+    command: ["docker/django/production/scripts/celery.sh"]
 
   rabbitmq:
     image: rabbitmq:3.12
