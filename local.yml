@@ -24,8 +24,6 @@ services:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-      - ./db_backup:/db_backup
-      - ./db_backup/dump.sql:/docker-entrypoint-initdb.d/dumpfile.sql
     env_file:
       - .env.local
     healthcheck:

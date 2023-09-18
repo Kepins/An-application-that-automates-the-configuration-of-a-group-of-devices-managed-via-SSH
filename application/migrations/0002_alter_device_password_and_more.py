@@ -5,20 +5,21 @@ import encrypted_model_fields.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('application', '0001_initial'),
+        ("application", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='device',
-            name='password',
-            field=encrypted_model_fields.fields.EncryptedCharField(null=True, verbose_name=255),
+            model_name="device",
+            name="password",
+            field=encrypted_model_fields.fields.EncryptedCharField(
+                null=True, verbose_name=255
+            ),
         ),
         migrations.AlterField(
-            model_name='keypair',
-            name='public_key_content',
+            model_name="keypair",
+            name="public_key_content",
             field=encrypted_model_fields.fields.EncryptedTextField(),
         ),
     ]
