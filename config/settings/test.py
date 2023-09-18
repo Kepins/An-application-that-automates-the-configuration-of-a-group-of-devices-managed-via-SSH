@@ -11,6 +11,8 @@ class DisableMigrations:
 
 MIGRATION_MODULES = DisableMigrations()
 
+DEBUG = False
+
 CELERY_TASK_ALWAYS_EAGER = True
 
 CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}

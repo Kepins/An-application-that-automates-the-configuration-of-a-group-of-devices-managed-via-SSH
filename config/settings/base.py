@@ -24,11 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the  key used in production secret!
-SECRET_KEY = env("DJANGO_SECRET_KEY", default="SECRET_KEY")
-FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", default="SECRET_KEY")
+SECRET_KEY = env("DJANGO_SECRET_KEY")
+FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool("DJANGO_DEBUG", True)
+DEBUG = env.bool("DJANGO_DEBUG", False)
 
 
 # ==============================================================================
@@ -86,17 +86,17 @@ TEMPLATES = [
 
 ASGI_APPLICATION = "config.asgi.application"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 # ==============================================================================
 # DATABASES SETTINGS
 # ==============================================================================
 DATABASES = {
     "default": {
-        "ENGINE": env("DB_ENGINE", default="django.db.backends.postgresql"),
-        "NAME": env("POSTGRES_DB", default="ssh_application"),
-        "USER": env("POSTGRES_USER", default="diploma_user"),
-        "PASSWORD": env("POSTGRES_PASSWORD", default="password"),
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("POSTGRES_DB"),
+        "USER": env("POSTGRES_USER"),
+        "PASSWORD": env("POSTGRES_PASSWORD"),
         "HOST": env("DB_HOST", default="database"),
     }
 }
@@ -120,7 +120,7 @@ CHANNEL_LAYERS = {
             "hosts": [
                 (
                     env("CHANNELLAYER_HOST", default="redis"),
-                    env.int("CHANNELLAYER_PORT", 6379),
+                    env.int("CHANNELLAYER_PORT", default=6379),
                 )
             ],
         },
@@ -162,7 +162,7 @@ REST_FRAMEWORK = {
 # SIMPLE JWT SETTINGS
 # ==============================================================================
 JWT_AUTH = {
-    "JWT_SECRET_KEY": SECRET_KEY,
+    "JWT_SECRET_KEY": env("DJANGO_SECRET_KEY"),
     "JWT_ALGORITHM": "HS256",
     "JWT_ALLOW_REFRESH": True,
     "JWT_EXPIRATION_DELTA": datetime.timedelta(seconds=3600),  # Token expiration 1 hour
