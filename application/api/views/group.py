@@ -26,8 +26,8 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_add_devices = GroupAddDevicesSerializer
     serializer_remove_devices = GroupRemoveDevicesSerializer
     serializer_run_script = RunSerializer
-    serializer_conn_Status = ConnStatusSerializer
-    serializer_run_Script_Status = RunScriptStatusSerializer
+    serializer_conn_status = ConnStatusSerializer
+    serializer_run_script_status = RunScriptStatusSerializer
 
     def get_serializer_class(self):
         if self.action == "add_devices":
@@ -35,7 +35,9 @@ class GroupViewSet(viewsets.ModelViewSet):
         if self.action == "remove_devices":
             return self.serializer_remove_devices
         if self.action == "sync_run_script":
-            ConnStatusSerializer
+            return self.serializer_run_script_status
+        if self.action == "sync_check_connection":
+            return self.serializer_conn_status
         return self.serializer_class
 
     @action(detail=True, methods=["PATCH"])
@@ -78,7 +80,7 @@ class GroupViewSet(viewsets.ModelViewSet):
             data.append(connection_data)
         serializer = self.get_serializer(data=data, many=True)
         serializer.is_valid(raise_exception=True)
-        return Response(serializer.data, status.HTTP_200_OK)
+        return Response(serializer.data, 200)
 
     @action(detail=True, methods=["POST"])
     def async_run_script(self, request, pk):
@@ -115,4 +117,4 @@ class GroupViewSet(viewsets.ModelViewSet):
             data.append(run_script_data)
         serializer = self.get_serializer(data=data, many=True)
         serializer.is_valid(raise_exception=True)
-        return Response(serializer.data, status.HTTP_200_OK)
+        return Response(serializer.data, 200)

@@ -136,10 +136,10 @@ def run_script(device_pk, group_pk, script_pk):
     try:
         connection.run(script.script, hide=True)
         status = RunScriptStatus.OK
-    except AuthenticationException as e:
+    except AuthenticationException:
         warns.append("Auth error during creating connection")
-        status = RunScriptStatus.HostNotAvailable.value
+        status = RunScriptStatus.HostNotAvailable
     except UnexpectedExit as e:
         warns.append(e.args[0].stderr)
-        status = RunScriptStatus.ErrorWhileRunningScript.value
+        status = RunScriptStatus.ErrorWhileRunningScript
     return status, warns
