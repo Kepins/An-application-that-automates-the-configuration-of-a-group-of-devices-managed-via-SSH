@@ -1,16 +1,10 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from celery import shared_task
-from fabric import Connection
-from invoke import UnexpectedExit
-from paramiko import AuthenticationException
 
 from application.api.serializers import RunScriptStatusSerializer
-from application.models import Script, Device
 from application.utils.task_utils import (
     run_script,
-    RunScriptStatus,
-    ConnectionStatus,
 )
 
 
