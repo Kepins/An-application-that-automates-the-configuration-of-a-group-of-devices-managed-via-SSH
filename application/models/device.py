@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from encrypted_model_fields import fields
 
 from .key_pair import KeyPair
 
@@ -28,4 +29,4 @@ class Device(models.Model):
     key_pair = models.ForeignKey(KeyPair, null=True, on_delete=models.SET_NULL)
 
     """Password"""
-    password = models.CharField(255, null=True)
+    password = fields.EncryptedCharField(255, null=True)
