@@ -6,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: docker/django/test/Dockerfile
+    command: python manage.py test
     depends_on:
       database:
         condition: service_healthy
