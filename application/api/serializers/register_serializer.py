@@ -19,7 +19,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         attrs = super().validate(attrs)
         if User.objects.exists():
             raise serializers.ValidationError(
-                {"fail": "Only one can exist in database."}
+                {"fail": "Only one user can exist in database."}
             )
         if attrs["password"] != attrs["password2"]:
             raise serializers.ValidationError(
