@@ -15,7 +15,7 @@ from application.tests.factories import (
 )
 
 
-class PostRunScriptTest(APITestCase):
+class PostAsyncRunScriptTest(APITestCase):
     @classmethod
     def setUp(cls):
         cls.test_script = ScriptFactory()
@@ -29,7 +29,7 @@ class PostRunScriptTest(APITestCase):
     @mock.patch("application.api.views.group.run_script_on_device")
     def test_group_with_devices(self, task_mock):
         self.client.force_authenticate(self.user)
-        url = reverse("api:groups-run-script", args=[self.test_group1.pk])
+        url = reverse("api:groups-async-run-script", args=[self.test_group1.pk])
         data = {
             "script": self.test_script.id,
         }
@@ -54,7 +54,7 @@ class PostRunScriptTest(APITestCase):
         task_mock.assert_not_called()
 
     def test_not_authenticated(self):
-        url = reverse("api:groups-run-script", args=[self.test_group1.pk])
+        url = reverse("api:groups-async-run-script", args=[self.test_group1.pk])
         data = {
             "script": self.test_script.id,
         }
@@ -64,7 +64,7 @@ class PostRunScriptTest(APITestCase):
     @mock.patch("application.api.views.group.run_script_on_device")
     def test_group_without_devices(self, task_mock):
         self.client.force_authenticate(self.user)
-        url = reverse("api:groups-run-script", args=[self.test_group2.pk])
+        url = reverse("api:groups-async-run-script", args=[self.test_group2.pk])
         data = {
             "script": self.test_script.id,
         }
@@ -77,7 +77,7 @@ class PostRunScriptTest(APITestCase):
     def test_group_not_exists(self, task_mock):
         self.client.force_authenticate(self.user)
         url = reverse(
-            "api:groups-run-script",
+            "api:groups-async-run-script",
             args=[max(self.test_group1.id, self.test_group2.id) + 1],
         )
         data = {
@@ -90,7 +90,7 @@ class PostRunScriptTest(APITestCase):
     @mock.patch("application.api.views.group.run_script_on_device")
     def test_script_not_exists(self, task_mock):
         self.client.force_authenticate(self.user)
-        url = reverse("api:groups-run-script", args=[self.test_group1.id])
+        url = reverse("api:groups-async-run-script", args=[self.test_group1.id])
         data = {
             "script": self.test_script.id + 1,
         }
