@@ -1,10 +1,13 @@
 from enum import Enum
 from io import StringIO
 
+from fabric import Connection
 import paramiko
+from invoke import UnexpectedExit
+from paramiko.ssh_exception import AuthenticationException
 
 from application.exceptions import SshConnectionException
-from application.models import Device, Group
+from application.models import Device, Group, Script
 
 
 class ConnectionStatus(Enum):
@@ -108,3 +111,35 @@ def check_connection(device_id, group_id):
     else:
         status = ConnectionStatus.BadAuthMethods
     return status, warns, password, key
+
+
+def run_script(device_pk, group_pk, script_pk):
+    status, warns, password, key = check_connection(device_pk, group_pk)
+    if status != ConnectionStatus.OK:
+        return status, warns
+    device = Device.objects.get(pk=device_pk)
+    if key:
+        connection = Connection(
+            host=device.hostname,
+            user=device.username,
+            port=device.port,
+            connect_kwargs={"pkey": key, "timeout": 10},
+        )
+    else:
+        connection = Connection(
+            host=device.hostname,
+            user=device.username,
+            port=device.port,
+            connect_kwargs={"password": password, "timeout": 10},
+        )
+    script = Script.objects.get(pk=script_pk)
+    try:
+        connection.run(script.script, hide=True)
+        status = RunScriptStatus.OK
+    except AuthenticationException:
+        warns.append("Auth error during creating connection")
+        status = RunScriptStatus.HostNotAvailable
+    except UnexpectedExit as e:
+        warns.append(e.args[0].stderr)
+        status = RunScriptStatus.ErrorWhileRunningScript
+    return status, warns
