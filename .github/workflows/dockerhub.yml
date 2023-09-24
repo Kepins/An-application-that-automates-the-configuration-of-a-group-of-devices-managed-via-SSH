@@ -1,9 +1,9 @@
 name: Deliver image
 
 on:
-  push:
-    branches:
-      - '*'
+  release:
+    types:
+      - released
 
 jobs:
   deliver:
@@ -18,18 +18,16 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-#      - name: Get Git Tag
-#        id: git_tag
-#        run: echo "::set-output name=TAG::$(git describe --tags --abbrev=0)"
-#
-#      - name: Build Docker image with version
-#        run: docker build -t ssh-configurator-api:${{ steps.git_tag.outputs.TAG }} -f docker/django/production/Dockerfile .
-#
-#      - name: Push Docker image with version
-#        run: docker push ssh-configurator-api:${{ steps.git_tag.outputs.TAG }}
+      - name: Echo Git Tag
+        id: git_tag
+        run: echo ${{ github.event.release.tag_name }}
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/ssh-configurator-api:latest -f docker/django/production/Dockerfile .
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/ssh-configurator-api:${{ github.event.release.tag_name }} -f docker/django/production/Dockerfile .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/ssh-configurator-api:latest -f docker/django/production/Dockerfile .
 
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/ssh-configurator-api:latest
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/ssh-configurator-api:${{ github.event.release.tag_name }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/ssh-configurator-api:latest
