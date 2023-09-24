@@ -1,4 +1,4 @@
-name: Deliver image
+name: Deliver released image
 
 on:
   release:
