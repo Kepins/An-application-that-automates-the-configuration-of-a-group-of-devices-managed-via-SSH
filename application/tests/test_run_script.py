@@ -13,6 +13,7 @@ from application.tests.factories import (
     DeviceFactory,
     UserFactory,
 )
+from application.utils.task_utils import RunScriptStatus
 
 
 class PostAsyncRunScriptTest(APITestCase):
@@ -98,3 +99,85 @@ class PostAsyncRunScriptTest(APITestCase):
         self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
         task_mock.assert_not_called()
         task_mock.delay.assert_not_called()
+
+
+class PostSyncRunScriptTest(APITestCase):
+    @classmethod
+    def setUp(cls):
+        cls.test_script = ScriptFactory()
+        cls.test_device1 = DeviceFactory()
+        cls.test_device2 = DeviceFactory()
+        cls.test_group1 = GroupFactory(devices=[cls.test_device1, cls.test_device2])
+        cls.test_group2 = GroupFactory(devices=[])
+        cls.user = UserFactory()
+        cls.client = APIClient()
+
+    @mock.patch("application.api.views.group.run_script")
+    def test_group_with_devices(self, task_mock):
+        task_mock.return_value = (RunScriptStatus.OK, [])
+
+        self.client.force_authenticate(self.user)
+        url = reverse("api:groups-sync-run-script", args=[self.test_group1.pk])
+        data = {
+            "script": self.test_script.id,
+        }
+        response = self.client.post(url, data)
+        res_content = json.loads(response.content)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        calls = [
+            call(
+                self.test_device1.id,
+                self.test_group1.id,
+                self.test_script.id,
+            ),
+            call(
+                self.test_device2.id,
+                self.test_group1.id,
+                self.test_script.id,
+            ),
+        ]
+        task_mock.assert_has_calls(calls)
+
+    def test_not_authenticated(self):
+        url = reverse("api:groups-sync-run-script", args=[self.test_group1.pk])
+        data = {
+            "script": self.test_script.id,
+        }
+        response = self.client.post(url, data)
+        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    @mock.patch("application.api.views.group.run_script")
+    def test_group_without_devices(self, task_mock):
+        self.client.force_authenticate(self.user)
+        url = reverse("api:groups-sync-run-script", args=[self.test_group2.pk])
+        data = {
+            "script": self.test_script.id,
+        }
+        response = self.client.post(url, data)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        task_mock.assert_not_called()
+
+    @mock.patch("application.api.views.group.run_script")
+    def test_group_not_exists(self, task_mock):
+        self.client.force_authenticate(self.user)
+        url = reverse(
+            "api:groups-sync-run-script",
+            args=[max(self.test_group1.id, self.test_group2.id) + 1],
+        )
+        data = {
+            "script": self.test_script.id,
+        }
+        response = self.client.post(url, data)
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        task_mock.assert_not_called()
+
+    @mock.patch("application.api.views.group.run_script")
+    def test_script_not_exists(self, task_mock):
+        self.client.force_authenticate(self.user)
+        url = reverse("api:groups-sync-run-script", args=[self.test_group1.id])
+        data = {
+            "script": self.test_script.id + 1,
+        }
+        response = self.client.post(url, data)
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+        task_mock.assert_not_called()
