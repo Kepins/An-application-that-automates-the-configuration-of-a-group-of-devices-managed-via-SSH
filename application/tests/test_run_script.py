@@ -156,7 +156,6 @@ class PostSyncRunScriptTest(APITestCase):
         response = self.client.post(url, data)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         task_mock.assert_not_called()
-        task_mock.delay.assert_not_called()
 
     @mock.patch("application.api.views.group.run_script")
     def test_group_not_exists(self, task_mock):
@@ -170,7 +169,7 @@ class PostSyncRunScriptTest(APITestCase):
         }
         response = self.client.post(url, data)
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
-        task_mock.delay.assert_not_called()
+        task_mock.assert_not_called()
 
     @mock.patch("application.api.views.group.run_script")
     def test_script_not_exists(self, task_mock):
@@ -182,4 +181,3 @@ class PostSyncRunScriptTest(APITestCase):
         response = self.client.post(url, data)
         self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
         task_mock.assert_not_called()
-        task_mock.delay.assert_not_called()
