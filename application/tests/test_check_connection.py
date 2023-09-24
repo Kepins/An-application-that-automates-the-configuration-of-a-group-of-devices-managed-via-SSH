@@ -11,6 +11,7 @@ from application.tests.factories import (
     DeviceFactory,
     UserFactory,
 )
+from application.utils.task_utils import ConnectionStatus
 
 
 class PostAsyncCheckConnectionTest(APITestCase):
@@ -64,6 +65,64 @@ class PostAsyncCheckConnectionTest(APITestCase):
         self.client.force_authenticate(self.user)
         url = reverse(
             "api:groups-async-check-connection",
+            args=[max(self.test_group1.id, self.test_group2.id) + 1],
+        )
+        response = self.client.post(url)
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        task_mock.assert_not_called()
+        task_mock.delay.assert_not_called()
+
+
+class PostSyncCheckConnectionTest(APITestCase):
+    @classmethod
+    def setUp(cls):
+        cls.test_device1 = DeviceFactory()
+        cls.test_device2 = DeviceFactory()
+        cls.test_group1 = GroupFactory(devices=[cls.test_device1, cls.test_device2])
+        cls.test_group2 = GroupFactory(devices=[])
+        cls.user = UserFactory()
+        cls.client = APIClient()
+
+    @mock.patch("application.api.views.group.check_connection")
+    def test_group_with_devices(self, task_mock):
+        task_mock.return_value = (ConnectionStatus.OK, [], None, None)
+        self.client.force_authenticate(self.user)
+        url = reverse("api:groups-sync-check-connection", args=[self.test_group1.pk])
+        response = self.client.post(url)
+        res_content = response.json()
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        calls = [
+            call(
+                self.test_device1.id,
+                self.test_group1.id,
+            ),
+            call(
+                self.test_device2.id,
+                self.test_group1.id,
+            ),
+        ]
+        task_mock.assert_has_calls(calls)
+        task_mock.delay.assert_not_called()
+
+    def test_not_authenticated(self):
+        url = reverse("api:groups-sync-check-connection", args=[self.test_group1.pk])
+        response = self.client.post(url)
+        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    @mock.patch("application.api.views.group.check_connection")
+    def test_group_without_devices(self, task_mock):
+        self.client.force_authenticate(self.user)
+        url = reverse("api:groups-sync-check-connection", args=[self.test_group2.pk])
+        response = self.client.post(url)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        task_mock.assert_not_called()
+        task_mock.delay.assert_not_called()
+
+    @mock.patch("application.api.views.group.check_connection")
+    def test_group_not_exists(self, task_mock):
+        self.client.force_authenticate(self.user)
+        url = reverse(
+            "api:groups-sync-check-connection",
             args=[max(self.test_group1.id, self.test_group2.id) + 1],
         )
         response = self.client.post(url)
