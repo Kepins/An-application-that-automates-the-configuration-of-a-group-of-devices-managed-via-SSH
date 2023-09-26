@@ -9,7 +9,7 @@ class Device(models.Model):
     """Model that represents device that could be configured"""
 
     """Human readable name"""
-    name = models.CharField(40)
+    name = models.CharField(100)
 
     """Account name on device"""
     username = models.CharField(255)
