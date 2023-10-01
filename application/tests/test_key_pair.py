@@ -92,6 +92,7 @@ class PostPublicKeyListTest(APITestCase):
             content_type="application/json",
             data=json.dumps(
                 {
+                    "name": key_pair.name,
                     "private_key_content": key_pair.private_key_content,
                     "public_key_content": key_pair.public_key_content,
                 }
@@ -207,6 +208,7 @@ class PutPublicKeyDetailTest(APITestCase):
             content_type="application/json",
             data=json.dumps(
                 {
+                    "name": key_pair.name,
                     "private_key_content": new_key_pair.private_key_content,
                     "public_key_content": new_key_pair.public_key_content,
                 }

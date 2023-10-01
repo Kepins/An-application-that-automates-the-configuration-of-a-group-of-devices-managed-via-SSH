@@ -15,12 +15,12 @@ class KeyPair(models.Model):
     #     RSA = "rsa"
 
     # type = models.CharField(choices=TypeOfKey.choices)
+    """Human readable name"""
+    name = models.CharField(100)
 
-    private_key_content = models.TextField(db_index=False)
+    private_key_content = fields.EncryptedTextField(db_index=False)
 
     """ssh-key file content (That COULD be stripped of the comment at the end)"""
-    public_key_content = fields.EncryptedTextField(
-        db_index=False
-    )  # 1024 is an arbitrary number
+    public_key_content = models.TextField(db_index=False)  # 1024 is an arbitrary number
 
     # comment = models.CharField()

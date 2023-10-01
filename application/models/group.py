@@ -8,7 +8,7 @@ class Group(models.Model):
     """Model that represents group of devices that could be configured"""
 
     """Human readable name"""
-    name = models.CharField(40)
+    name = models.CharField(100)
 
     """Key used for ssh authorization"""
     key_pair = models.ForeignKey(KeyPair, null=True, on_delete=models.SET_NULL)
