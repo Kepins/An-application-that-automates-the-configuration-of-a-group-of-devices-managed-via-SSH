@@ -156,7 +156,6 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.BasicAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
@@ -164,14 +163,10 @@ REST_FRAMEWORK = {
 # ==============================================================================
 # SIMPLE JWT SETTINGS
 # ==============================================================================
-JWT_AUTH = {
-    "JWT_SECRET_KEY": env("DJANGO_SECRET_KEY"),
-    "JWT_ALGORITHM": "HS256",
-    "JWT_ALLOW_REFRESH": True,
-    "JWT_EXPIRATION_DELTA": datetime.timedelta(seconds=3600),  # Token expiration 1 hour
-    "JWT_REFRESH_EXPIRATION_DELTA": datetime.timedelta(
-        days=7
-    ),  # Refresh token expiration time (7 days)
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=7),
+    "SIGNING_KEY": env("DJANGO_SECRET_KEY"),
 }
 
 AUTH_USER_MODEL = "application.CustomUser"
