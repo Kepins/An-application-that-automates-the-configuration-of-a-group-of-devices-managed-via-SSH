@@ -11,7 +11,7 @@ from rest_framework_simplejwt.views import (
 from application.api.views.device import DeviceViewSet
 from application.api.views.key_pair import KeyPairViewSet
 from application.api.views.group import GroupViewSet
-from application.api.views.custom_user import RegisterView
+from application.api.views.custom_user import RegisterView, user_exists
 from application.api.views.script import ScriptViewSet
 from application.consumers import Consumer
 
@@ -26,6 +26,7 @@ urlpatterns = [
     path("auth/refresh/", TokenRefreshView.as_view(), name="refresh"),
     path("api/", include((router.urls, "api"), namespace="api")),
     path("auth/register/", RegisterView.as_view(), name="register"),
+    path("auth/user_exists", user_exists, name="user_exists"),
 ]
 
 if settings.DEBUG:
