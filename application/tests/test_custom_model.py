@@ -86,3 +86,24 @@ class TestLoginUser(APITestCase):
         self.assertEqual(
             "No active account found with the given credentials", res_content["detail"]
         )
+
+
+class TestUserExistsApiView(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = reverse("user_exists")
+
+    def test_user_not_exists(self):
+        response = self.client.get(self.url)
+        res_content = json.loads(response.content)
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertFalse(res_content["exists"])
+
+    def test_user_exists(self):
+        UserFactory()
+        response = self.client.get(self.url)
+        res_content = json.loads(response.content)
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertTrue(res_content["exists"])
