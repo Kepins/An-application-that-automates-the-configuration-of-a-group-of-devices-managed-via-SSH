@@ -132,14 +132,16 @@ def run_script(device_pk, group_pk, script_pk):
             port=device.port,
             connect_kwargs={"password": password, "timeout": 10},
         )
+    result = None
     script = Script.objects.get(pk=script_pk)
     try:
-        connection.run(script.script, hide=True)
+        result_obj = connection.run(script.script, hide=True)
+        result = result_obj.stdout
         status = RunScriptStatus.OK
     except AuthenticationException:
         warns.append("Auth error during creating connection")
         status = RunScriptStatus.HostNotAvailable
     except UnexpectedExit as e:
-        warns.append(e.args[0].stderr)
+        result = e.args[0].stderr
         status = RunScriptStatus.ErrorWhileRunningScript
-    return status, warns
+    return status, warns, result

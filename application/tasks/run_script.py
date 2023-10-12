@@ -16,13 +16,15 @@ def run_script_on_device(group_pk, device_pk, script_pk, request_uuid):
             "request_uuid": request_uuid,
             "device": device_pk,
             "warnings": [],
+            "result": "",
         },
     )
     channel_layer = get_channel_layer()
 
-    status, warns = run_script(device_pk, group_pk, script_pk)
+    status, warns, result = run_script(device_pk, group_pk, script_pk)
     response.initial_data["status"] = status.value
     response.initial_data["warnings"] = warns
+    response.initial_data["result"] = result
     response.is_valid(raise_exception=True)
     async_to_sync(channel_layer.group_send)(
         f"group",

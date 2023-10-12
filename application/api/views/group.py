@@ -106,13 +106,14 @@ class GroupViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         data = []
         for d in group.devices.all():
-            status, warns = run_script(
+            status, warns, result = run_script(
                 d.id, group.id, serializer.validated_data["script"].pk
             )
             run_script_data = {
                 "device": d.id,
                 "status": status.value,
                 "warnings": warns,
+                "result": result,
             }
             data.append(run_script_data)
         serializer = self.get_serializer(data=data, many=True)
