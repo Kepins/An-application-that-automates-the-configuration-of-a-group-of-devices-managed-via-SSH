@@ -114,9 +114,10 @@ def check_connection(device_id, group_id):
 
 
 def run_script(device_pk, group_pk, script_pk):
+    result = None
     status, warns, password, key = check_connection(device_pk, group_pk)
     if status != ConnectionStatus.OK:
-        return status, warns
+        return status, warns, result
     device = Device.objects.get(pk=device_pk)
     if key:
         connection = Connection(
@@ -132,7 +133,6 @@ def run_script(device_pk, group_pk, script_pk):
             port=device.port,
             connect_kwargs={"password": password, "timeout": 10},
         )
-    result = None
     script = Script.objects.get(pk=script_pk)
     try:
         result_obj = connection.run(script.script, hide=True)
