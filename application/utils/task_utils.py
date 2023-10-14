@@ -1,10 +1,12 @@
 from enum import Enum
 from io import StringIO
+import socket
 
 from fabric import Connection
-import paramiko
 from invoke import UnexpectedExit
+import paramiko
 from paramiko.ssh_exception import AuthenticationException
+
 
 from application.exceptions import SshConnectionException
 from application.models import Device, Group, Script
@@ -73,6 +75,10 @@ def check_connection(device_id, group_id):
         transport.connect()
     except paramiko.ssh_exception.SSHException:
         status = ConnectionStatus.HostNotAvailable
+        return status, warns, password, key
+    except socket.gaierror:
+        status = ConnectionStatus.HostNotAvailable
+        warns.append("Invalid hostname or port")
         return status, warns, password, key
 
     authenticated = False
