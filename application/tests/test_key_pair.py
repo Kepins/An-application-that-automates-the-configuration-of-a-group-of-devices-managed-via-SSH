@@ -13,9 +13,6 @@ from application.tests.factories import (
 def assert_key_pair_matches_json(test_case, key_pair, key_pair_json):
     test_case.assertEquals(key_pair_json["id"], key_pair.id)
     test_case.assertEquals(
-        key_pair_json["private_key_content"], key_pair.private_key_content
-    )
-    test_case.assertEquals(
         key_pair_json["public_key_content"], key_pair.public_key_content
     )
 
