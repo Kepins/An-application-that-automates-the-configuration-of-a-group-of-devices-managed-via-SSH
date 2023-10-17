@@ -34,5 +34,5 @@ if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 websocket_urlpatterns = [
-    path("<token>/", Consumer.as_asgi()),
+    path("ws/<token>/", Consumer.as_asgi()),
 ]
