@@ -120,10 +120,11 @@ def check_connection(device_id, group_id):
 
 
 def run_script(device_pk, group_pk, script_pk):
-    result = None
+    result_std = ""
+    result_err = ""
     status, warns, password, key = check_connection(device_pk, group_pk)
     if status != ConnectionStatus.OK:
-        return status, warns, result
+        return status, warns, result_std, result_err
     device = Device.objects.get(pk=device_pk)
     if key:
         connection = Connection(
@@ -142,12 +143,13 @@ def run_script(device_pk, group_pk, script_pk):
     script = Script.objects.get(pk=script_pk)
     try:
         result_obj = connection.run(script.script, hide=True)
-        result = result_obj.stdout
+        result_std = result_obj.stdout
         status = RunScriptStatus.OK
     except AuthenticationException:
         warns.append("Auth error during creating connection")
         status = RunScriptStatus.HostNotAvailable
     except UnexpectedExit as e:
-        result = e.args[0].stderr
+        result_err = e.args[0].stderr
+        result_std = e.args[0].stdout
         status = RunScriptStatus.ErrorWhileRunningScript
-    return status, warns, result
+    return status, warns, result_std, result_err

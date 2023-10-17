@@ -114,7 +114,7 @@ class PostSyncRunScriptTest(APITestCase):
 
     @mock.patch("application.api.views.group.run_script")
     def test_group_with_devices(self, task_mock):
-        task_mock.return_value = (RunScriptStatus.OK, [], "result")
+        task_mock.return_value = (RunScriptStatus.OK, [], "result", "")
 
         self.client.force_authenticate(self.user)
         url = reverse("api:groups-sync-run-script", args=[self.test_group1.pk])

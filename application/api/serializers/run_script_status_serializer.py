@@ -10,4 +10,5 @@ class RunScriptStatusSerializer(serializers.Serializer):
         choices=[(e.value, e.name) for e in RunScriptStatus]
     )
     warnings = serializers.ListField(child=serializers.CharField())
-    result = serializers.CharField()
+    result_std = serializers.CharField(allow_blank=True)
+    result_err = serializers.CharField(allow_blank=True)
