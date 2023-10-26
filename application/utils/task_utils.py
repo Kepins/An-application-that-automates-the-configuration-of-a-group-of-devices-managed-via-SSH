@@ -144,6 +144,7 @@ def run_script(device_pk, group_pk, script_pk):
     try:
         result_obj = connection.run(script.script, hide=True)
         result_std = result_obj.stdout
+        result_err = result_obj.stderr
         status = RunScriptStatus.OK
     except AuthenticationException:
         warns.append("Auth error during creating connection")
