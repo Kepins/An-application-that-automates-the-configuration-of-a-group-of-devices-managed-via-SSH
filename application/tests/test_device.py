@@ -20,6 +20,10 @@ def assert_device_matches_json(test_case, device, device_json):
         test_case.assertEquals(device_json["key_pair"], device.key_pair.id)
     else:
         test_case.assertEquals(device_json["key_pair"], None)
+    if device.password:
+        test_case.assertEquals(device_json["is_password_set"], True)
+    else:
+        test_case.assertEquals(device_json["is_password_set"], False)
 
 
 class GetDeviceListTest(APITestCase):
