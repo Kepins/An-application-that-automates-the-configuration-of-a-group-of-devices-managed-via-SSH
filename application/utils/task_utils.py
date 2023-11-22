@@ -80,7 +80,10 @@ def check_connection(device_id, group_id):
         status = ConnectionStatus.HostNotAvailable
         warns.append("Invalid hostname or port")
         return status, warns, password, key
-
+    if not device.public_key:
+        device_key = transport.get_remote_server_key()
+        device.public_key = f"ssh-{device_key.algorithm_name} {device_key.get_base64()}"
+        device.save()
     authenticated = False
 
     # try

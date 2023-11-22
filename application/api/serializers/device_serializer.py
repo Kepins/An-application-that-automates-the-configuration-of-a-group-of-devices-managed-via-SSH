@@ -20,4 +20,5 @@ class DeviceSerializer(serializers.ModelSerializer):
             "port": {"required": True},
             "key_pair": {"required": True},
             "password": {"required": True},
+            "public_key": {"required": True},
         }
