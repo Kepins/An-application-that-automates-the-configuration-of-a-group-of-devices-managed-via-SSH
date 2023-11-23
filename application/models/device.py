@@ -30,3 +30,6 @@ class Device(models.Model):
 
     """Password"""
     password = fields.EncryptedCharField(255, null=True)
+
+    """Device public key to prevent MitM attacks"""
+    public_key = models.TextField(db_index=False, null=True)

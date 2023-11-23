@@ -100,6 +100,7 @@ class PostDeviceListTest(APITestCase):
                     "key_pair": None,
                     "port": device.port,
                     "password": device.password,
+                    "public_key": None,
                 }
             ),
         )
@@ -121,6 +122,7 @@ class PostDeviceListTest(APITestCase):
                     "key_pair": 1,
                     "port": device.port,
                     "password": device.password,
+                    "public_key": None,
                 }
             ),
         )
@@ -143,6 +145,7 @@ class PostDeviceListTest(APITestCase):
                     "key_pair": key_pair.id,
                     "port": device.port,
                     "password": device.password,
+                    "public_key": None,
                 }
             ),
         )
@@ -163,6 +166,7 @@ class PostDeviceListTest(APITestCase):
                     "key_pair": 1,
                     "port": device.port,
                     "password": device.password,
+                    "public_key": None,
                 }
             ),
         )
@@ -245,6 +249,7 @@ class PutDeviceDetailTest(APITestCase):
                     "key_pair": new_device.key_pair.id,
                     "port": new_device.port,
                     "password": new_device.password,
+                    "public_key": None,
                 }
             ),
         )
@@ -269,6 +274,7 @@ class PutDeviceDetailTest(APITestCase):
                     "key_pair": None,
                     "port": new_device.port,
                     "password": new_device.password,
+                    "public_key": None,
                 }
             ),
         )
@@ -291,6 +297,7 @@ class PutDeviceDetailTest(APITestCase):
                     "hostname": new_device.hostname,
                     "port": new_device.port,
                     "password": new_device.password,
+                    "public_key": None,
                 }
             ),
         )
@@ -312,6 +319,7 @@ class PutDeviceDetailTest(APITestCase):
                     "key_pair": new_device.key_pair.id,
                     "port": new_device.port,
                     "password": new_device.password,
+                    "public_key": None,
                 }
             ),
         )
