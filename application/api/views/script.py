@@ -5,5 +5,5 @@ from application.models import Script
 
 
 class ScriptViewSet(viewsets.ModelViewSet):
-    queryset = Script.objects.all()
+    queryset = Script.objects.order_by("id")
     serializer_class = ScriptSerializer

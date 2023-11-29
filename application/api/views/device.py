@@ -5,5 +5,5 @@ from application.models.device import Device
 
 
 class DeviceViewSet(viewsets.ModelViewSet):
-    queryset = Device.objects.all()
+    queryset = Device.objects.order_by("id")
     serializer_class = DeviceSerializer

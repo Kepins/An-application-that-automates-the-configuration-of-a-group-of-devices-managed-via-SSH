@@ -5,5 +5,5 @@ from application.models.key_pair import KeyPair
 
 
 class KeyPairViewSet(viewsets.ModelViewSet):
-    queryset = KeyPair.objects.all()
+    queryset = KeyPair.objects.order_by("id")
     serializer_class = KeyPairSerializer

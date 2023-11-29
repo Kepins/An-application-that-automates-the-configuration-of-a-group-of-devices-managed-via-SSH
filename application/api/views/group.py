@@ -21,7 +21,7 @@ from application.utils.task_utils import check_connection, run_script
 
 
 class GroupViewSet(viewsets.ModelViewSet):
-    queryset = Group.objects.all()
+    queryset = Group.objects.order_by("id")
     serializer_class = GroupSerializer
     serializer_add_devices = GroupAddDevicesSerializer
     serializer_remove_devices = GroupRemoveDevicesSerializer
