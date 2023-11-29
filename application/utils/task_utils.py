@@ -1,3 +1,4 @@
+import binascii
 from enum import Enum
 from io import StringIO
 import socket
@@ -6,7 +7,8 @@ from fabric import Connection
 from invoke import UnexpectedExit
 import paramiko
 from paramiko.ssh_exception import AuthenticationException
-
+from paramiko import PKey
+import base64
 
 from application.exceptions import SshConnectionException
 from application.models import Device, Group, Script
@@ -15,14 +17,15 @@ from application.models import Device, Group, Script
 class ConnectionStatus(Enum):
     OK = "Ok"
     BadAuthMethods = "Bad authentication methods"
-    HostNotAvailable = "(Network)Host not available"
+    HostNotAvailable = "Connection problem"
+    BadDevicePublicKey = "Bad public key format"
 
 
 class RunScriptStatus(Enum):
     ErrorWhileRunningScript = "Error while running script"
     OK = "Ok"
     BadAuthMethods = "Bad authentication methods"
-    HostNotAvailable = "(Network)Host not available"
+    HostNotAvailable = "Connection problem"
 
 
 def load_key(pkey_content):
@@ -70,13 +73,32 @@ def check_connection(device_id, group_id):
     password = None
     key = None
     warns = []
+
+    hostkey = None
+    if device.public_key:
+        try:
+            key_bytes = base64.b64decode(device.public_key.split(" ")[1])
+        except binascii.Error:
+            status = ConnectionStatus.BadDevicePublicKey
+            warns.append("Invalid format of device public key")
+            return status, warns, password, key
+        try:
+            hostkey = PKey.from_type_string(device.public_key.split(" ")[0].lower(), key_bytes)
+        except:
+            status = ConnectionStatus.BadDevicePublicKey
+            warns.append("Invalid format of device public key")
+            return status, warns, password, key
     try:
         transport = paramiko.Transport((device.hostname, device.port))
-        transport.connect()
-    except paramiko.ssh_exception.SSHException:
+        transport.connect(hostkey=hostkey)
+    except paramiko.ssh_exception.SSHException as e:
         status = ConnectionStatus.HostNotAvailable
+        if str(e) == "Bad host key from server":
+            warns.append("Device's SSH server uses different public key than specified")
+        else:
+            warns.append(str(e))
         return status, warns, password, key
-    except socket.gaierror:
+    except socket.gaierror as e:
         status = ConnectionStatus.HostNotAvailable
         warns.append("Invalid hostname or port")
         return status, warns, password, key
