@@ -85,7 +85,7 @@ class PostSyncCheckConnectionTest(APITestCase):
 
     @mock.patch("application.api.views.group.check_connection")
     def test_group_with_devices(self, task_mock):
-        task_mock.return_value = (ConnectionStatus.OK, [], None, None)
+        task_mock.return_value = (ConnectionStatus.OK, [], None)
         self.client.force_authenticate(self.user)
         url = reverse("api:groups-sync-check-connection", args=[self.test_group1.pk])
         response = self.client.post(url)
