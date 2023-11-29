@@ -78,7 +78,7 @@ def check_connection(device_id, group_id):
     if device.public_key:
         try:
             key_bytes = base64.b64decode(device.public_key.split(" ")[1])
-        except binascii.Error:
+        except (binascii.Error, IndexError):
             status = ConnectionStatus.BadDevicePublicKey
             warns.append("Invalid format of device public key")
             return status, warns, password, key
