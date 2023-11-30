@@ -1,3 +1,4 @@
+import binascii
 from enum import Enum
 from io import StringIO
 import socket
@@ -6,7 +7,8 @@ from fabric import Connection
 from invoke import UnexpectedExit
 import paramiko
 from paramiko.ssh_exception import AuthenticationException
-
+from paramiko import PKey
+import base64
 
 from application.exceptions import SshConnectionException
 from application.models import Device, Group, Script
@@ -15,14 +17,15 @@ from application.models import Device, Group, Script
 class ConnectionStatus(Enum):
     OK = "Ok"
     BadAuthMethods = "Bad authentication methods"
-    HostNotAvailable = "(Network)Host not available"
+    HostNotAvailable = "Connection problem"
+    BadDevicePublicKey = "Bad public key format"
 
 
 class RunScriptStatus(Enum):
     ErrorWhileRunningScript = "Error while running script"
     OK = "Ok"
     BadAuthMethods = "Bad authentication methods"
-    HostNotAvailable = "(Network)Host not available"
+    HostNotAvailable = "Connection problem"
 
 
 def load_key(pkey_content):
@@ -64,22 +67,42 @@ def test_auth_pass(transport, username, password):
     return True, password
 
 
-def check_connection(device_id, group_id):
+def check_connection(device_id, group_id, close_transport=True):
     device = Device.objects.get(pk=device_id)
     group = Group.objects.get(pk=group_id)
-    password = None
-    key = None
     warns = []
+
+    hostkey = None
+    if device.public_key:
+        try:
+            key_bytes = base64.b64decode(device.public_key.split(" ")[1])
+        except (binascii.Error, IndexError):
+            status = ConnectionStatus.BadDevicePublicKey
+            warns.append("Invalid format of device public key")
+            return status, warns, None
+        try:
+            hostkey = PKey.from_type_string(device.public_key.split(" ")[0].lower(), key_bytes)
+        except:
+            status = ConnectionStatus.BadDevicePublicKey
+            warns.append("Invalid format of device public key")
+            return status, warns, None
     try:
         transport = paramiko.Transport((device.hostname, device.port))
-        transport.connect()
-    except paramiko.ssh_exception.SSHException:
-        status = ConnectionStatus.HostNotAvailable
-        return status, warns, password, key
-    except socket.gaierror:
+    except socket.gaierror as e:
         status = ConnectionStatus.HostNotAvailable
         warns.append("Invalid hostname or port")
-        return status, warns, password, key
+        return status, warns, None
+    try:
+        transport.connect(hostkey=hostkey)
+    except paramiko.ssh_exception.SSHException as e:
+        status = ConnectionStatus.HostNotAvailable
+        if str(e) == "Bad host key from server":
+            warns.append("Device's SSH server uses different public key than specified")
+        else:
+            warns.append(str(e))
+        transport.close()
+        return status, warns, None
+
     if not device.public_key:
         device_key = transport.get_remote_server_key()
         device.public_key = f"ssh-{device_key.algorithm_name} {device_key.get_base64()}"
@@ -114,46 +137,43 @@ def check_connection(device_id, group_id):
     if not any([device.key_pair, group.key_pair, device.password]):
         warns.append("No authentication method")
 
-    transport.close()
     if authenticated:
         status = ConnectionStatus.OK
     else:
         status = ConnectionStatus.BadAuthMethods
-    return status, warns, password, key
+
+    if close_transport or status != ConnectionStatus.OK:
+        transport.close()
+        return status, warns, None
+    return status, warns, transport
 
 
 def run_script(device_pk, group_pk, script_pk):
     result_std = ""
     result_err = ""
-    status, warns, password, key = check_connection(device_pk, group_pk)
+    status, warns, transport = check_connection(device_pk, group_pk, close_transport=False)
     if status != ConnectionStatus.OK:
         return status, warns, result_std, result_err
-    device = Device.objects.get(pk=device_pk)
-    if key:
-        connection = Connection(
-            host=device.hostname,
-            user=device.username,
-            port=device.port,
-            connect_kwargs={"pkey": key, "timeout": 10},
-        )
-    else:
-        connection = Connection(
-            host=device.hostname,
-            user=device.username,
-            port=device.port,
-            connect_kwargs={"password": password, "timeout": 10},
-        )
     script = Script.objects.get(pk=script_pk)
-    try:
-        result_obj = connection.run(script.script, hide=True)
-        result_std = result_obj.stdout
-        result_err = result_obj.stderr
+    channel = transport.open_session()
+
+    channel.exec_command(script.script)
+    channel.recv_exit_status()
+
+    if channel.exit_status == 0:
         status = RunScriptStatus.OK
-    except AuthenticationException:
-        warns.append("Auth error during creating connection")
-        status = RunScriptStatus.HostNotAvailable
-    except UnexpectedExit as e:
-        result_err = e.args[0].stderr
-        result_std = e.args[0].stdout
+    else:
         status = RunScriptStatus.ErrorWhileRunningScript
+
+    stdout = channel.makefile('r')
+    stderr = channel.makefile_stderr('r')
+
+    result_std = stdout.read().decode('utf-8')
+    result_err = stderr.read().decode('utf-8')
+
+    stderr.close()
+    stdout.close()
+
+    channel.close()
+    transport.close()
     return status, warns, result_std, result_err

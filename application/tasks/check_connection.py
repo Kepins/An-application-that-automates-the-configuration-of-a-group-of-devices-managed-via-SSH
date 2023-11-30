@@ -19,7 +19,7 @@ def check_connection_task(group_id, device_id, request_uuid=None):
 
     channel_layer = get_channel_layer()
 
-    status, warns, password, key = check_connection(device_id, group_id)
+    status, warns, _ = check_connection(device_id, group_id)
     response.initial_data["status"] = status.value
     response.initial_data["warnings"] = warns
     response.is_valid(raise_exception=True)

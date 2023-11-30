@@ -71,7 +71,7 @@ class GroupViewSet(viewsets.ModelViewSet):
         group = self.get_object()
         data = []
         for d in group.devices.all():
-            status, warns, password, key = check_connection(d.id, group.id)
+            status, warns, _ = check_connection(d.id, group.id)
             connection_data = {
                 "device": d.id,
                 "status": status.value,
