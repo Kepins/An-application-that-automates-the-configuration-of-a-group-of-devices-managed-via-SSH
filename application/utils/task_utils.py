@@ -8,6 +8,7 @@ from invoke import UnexpectedExit
 import paramiko
 from paramiko.ssh_exception import AuthenticationException
 from paramiko import PKey
+from django.conf import settings
 import base64
 
 from application.exceptions import SshConnectionException
@@ -35,6 +36,8 @@ def load_key(pkey_content):
             return c(file_obj=StringIO(pkey_content))
         except (paramiko.ssh_exception.SSHException, IOError) as e:
             pass
+        except:
+            pass
     raise SshConnectionException("Wrong key format")
 
 
@@ -47,8 +50,12 @@ def test_auth_key(transport, username, key_pair):
         raise SshConnectionException("Key-auth method not allowed")
     except paramiko.ssh_exception.AuthenticationException:
         raise SshConnectionException("Key-auth failed")
-    except paramiko.ssh_exception.SSHException:
+    except paramiko.ssh_exception.SSHException as e:
         raise SshConnectionException("Network error")
+    except ValueError:
+        raise SshConnectionException("Wrong key format")
+    except:
+        raise SshConnectionException("Key-auth error")
 
     return True, pk
 
@@ -87,11 +94,31 @@ def check_connection(device_id, group_id, close_transport=True):
             warns.append("Invalid format of device public key")
             return status, warns, None
     try:
-        transport = paramiko.Transport((device.hostname, device.port))
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(settings.SOCKET_TIMEOUT_SECONDS)
+        sock.connect((device.hostname, device.port))
+        transport = paramiko.Transport(sock)
     except socket.gaierror as e:
         status = ConnectionStatus.HostNotAvailable
         warns.append("Invalid hostname or port")
         return status, warns, None
+    except paramiko.ssh_exception.SSHException as e:
+        status = ConnectionStatus.HostNotAvailable
+        warns.append(str(e))
+        return status, warns, None
+    except socket.timeout as e:
+        status = ConnectionStatus.HostNotAvailable
+        warns.append(str(e))
+        return status, warns, None
+    except OSError as e:
+        status = ConnectionStatus.HostNotAvailable
+        warns.append(str(e))
+        return status, warns, None
+    except Exception as e:
+        status = ConnectionStatus.HostNotAvailable
+        warns.append(str(e))
+        return status, warns, None
+
     try:
         transport.connect(hostkey=hostkey)
     except paramiko.ssh_exception.SSHException as e:
