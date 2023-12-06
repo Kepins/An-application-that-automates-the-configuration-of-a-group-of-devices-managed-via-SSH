@@ -26,6 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY")
 
+SOCKET_TIMEOUT_SECONDS = env("SOCKET_TIMEOUT_SECONDS", default=16)
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DJANGO_DEBUG", False)
 
