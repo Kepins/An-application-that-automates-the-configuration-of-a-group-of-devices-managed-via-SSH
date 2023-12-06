@@ -11,7 +11,7 @@ from paramiko import PKey
 from django.conf import settings
 import base64
 
-from application.exceptions import SshConnectionException
+from application.exceptions import SshConnectionException, TransportCreateException
 from application.models import Device, Group, Script
 
 
@@ -27,6 +27,63 @@ class RunScriptStatus(Enum):
     OK = "Ok"
     BadAuthMethods = "Bad authentication methods"
     HostNotAvailable = "Connection problem"
+
+
+def create_transport(device):
+    warns = []
+
+    hostkey = None
+    if device.public_key:
+        try:
+            key_bytes = base64.b64decode(device.public_key.split(" ")[1])
+        except (binascii.Error, IndexError):
+            status = ConnectionStatus.BadDevicePublicKey
+            warns.append("Invalid format of device public key")
+            raise TransportCreateException(status, warns)
+        try:
+            hostkey = PKey.from_type_string(device.public_key.split(" ")[0].lower(), key_bytes)
+        except:
+            status = ConnectionStatus.BadDevicePublicKey
+            warns.append("Invalid format of device public key")
+            raise TransportCreateException(status, warns)
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(settings.SOCKET_TIMEOUT_SECONDS)
+        sock.connect((device.hostname, device.port))
+        transport = paramiko.Transport(sock)
+    except socket.gaierror as e:
+        status = ConnectionStatus.HostNotAvailable
+        warns.append("Invalid hostname or port")
+        raise TransportCreateException(status, warns)
+    except paramiko.ssh_exception.SSHException as e:
+        status = ConnectionStatus.HostNotAvailable
+        warns.append(str(e))
+        raise TransportCreateException(status, warns)
+    except socket.timeout as e:
+        status = ConnectionStatus.HostNotAvailable
+        warns.append(str(e))
+        raise TransportCreateException(status, warns)
+    except OSError as e:
+        status = ConnectionStatus.HostNotAvailable
+        warns.append(str(e))
+        raise TransportCreateException(status, warns)
+    except Exception as e:
+        status = ConnectionStatus.HostNotAvailable
+        warns.append(str(e))
+        raise TransportCreateException(status, warns)
+
+    try:
+        transport.connect(hostkey=hostkey)
+    except paramiko.ssh_exception.SSHException as e:
+        status = ConnectionStatus.HostNotAvailable
+        if str(e) == "Bad host key from server":
+            warns.append("Device's SSH server uses different public key than specified")
+        else:
+            warns.append(str(e))
+        transport.close()
+        raise TransportCreateException(status, warns)
+
+    return transport
 
 
 def load_key(pkey_content):
@@ -79,56 +136,10 @@ def check_connection(device_id, group_id, close_transport=True):
     group = Group.objects.get(pk=group_id)
     warns = []
 
-    hostkey = None
-    if device.public_key:
-        try:
-            key_bytes = base64.b64decode(device.public_key.split(" ")[1])
-        except (binascii.Error, IndexError):
-            status = ConnectionStatus.BadDevicePublicKey
-            warns.append("Invalid format of device public key")
-            return status, warns, None
-        try:
-            hostkey = PKey.from_type_string(device.public_key.split(" ")[0].lower(), key_bytes)
-        except:
-            status = ConnectionStatus.BadDevicePublicKey
-            warns.append("Invalid format of device public key")
-            return status, warns, None
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(settings.SOCKET_TIMEOUT_SECONDS)
-        sock.connect((device.hostname, device.port))
-        transport = paramiko.Transport(sock)
-    except socket.gaierror as e:
-        status = ConnectionStatus.HostNotAvailable
-        warns.append("Invalid hostname or port")
-        return status, warns, None
-    except paramiko.ssh_exception.SSHException as e:
-        status = ConnectionStatus.HostNotAvailable
-        warns.append(str(e))
-        return status, warns, None
-    except socket.timeout as e:
-        status = ConnectionStatus.HostNotAvailable
-        warns.append(str(e))
-        return status, warns, None
-    except OSError as e:
-        status = ConnectionStatus.HostNotAvailable
-        warns.append(str(e))
-        return status, warns, None
-    except Exception as e:
-        status = ConnectionStatus.HostNotAvailable
-        warns.append(str(e))
-        return status, warns, None
-
-    try:
-        transport.connect(hostkey=hostkey)
-    except paramiko.ssh_exception.SSHException as e:
-        status = ConnectionStatus.HostNotAvailable
-        if str(e) == "Bad host key from server":
-            warns.append("Device's SSH server uses different public key than specified")
-        else:
-            warns.append(str(e))
-        transport.close()
-        return status, warns, None
+        transport = create_transport(device)
+    except TransportCreateException as e:
+        return e.status, e.warns, None
 
     if not device.public_key:
         device_key = transport.get_remote_server_key()
@@ -147,6 +158,10 @@ def check_connection(device_id, group_id, close_transport=True):
 
     if not authenticated and group.key_pair:
         try:
+            transport = create_transport(device)
+        except TransportCreateException as e:
+            return e.status, e.warns, None
+        try:
             authenticated, key = test_auth_key(
                 transport, device.username, group.key_pair
             )
@@ -154,6 +169,10 @@ def check_connection(device_id, group_id, close_transport=True):
             warns.append(f"(Group Key){e.error}")
 
     if not authenticated and device.password:
+        try:
+            transport = create_transport(device)
+        except TransportCreateException as e:
+            return e.status, e.warns, None
         try:
             authenticated, password = test_auth_pass(
                 transport, device.username, device.password
